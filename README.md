@@ -6,7 +6,7 @@ This repository contains the **Frontend** application for the Neuro Path platfor
 
 ## 🚀 Features Included
 
-*   **Student Dashboard:** Real-time performance tracking, AI productivity scores, and study streak monitoring.
+*   **Student Dashboard:** Real-time performance tracking, AI productivity score and study streak monitoring.
 *   **AI Adaptive Quiz:** Dynamic difficulty adjustments using Bayesian Knowledge Tracing (BKT) and a responsive AI Tutor Hint system.
 *   **Analytics & Focus:** Parental dashboard views, live webcam/mouse focus heuristics visualization, and weak subject detection via radar charts.
 *   **Gamification System:** Global leaderboards, XP tracking, and unlockable achievement badges.
@@ -15,7 +15,7 @@ This repository contains the **Frontend** application for the Neuro Path platfor
 ## 🛠️ Tech Stack
 
 *   **Framework:** [React 18](https://react.dev/) + [Vite](https://vitejs.dev/)
-*   **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) (Glassmorphism & Neon Design System)
+*   **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
 *   **Animations:** [Framer Motion](https://www.framer.com/motion/)
 *   **Data Visualization:** [Recharts](https://recharts.org/)
 *   **Icons:** [Lucide React](https://lucide.dev/)
