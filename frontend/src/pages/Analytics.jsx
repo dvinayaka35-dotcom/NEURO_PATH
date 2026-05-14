@@ -1,0 +1,92 @@
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
+import { Activity, AlertTriangle, TrendingUp } from 'lucide-react';
+
+const subjectMastery = [
+  { subject: 'Algebra', mastery: 90, fullMark: 100 },
+  { subject: 'Geometry', mastery: 65, fullMark: 100 },
+  { subject: 'Physics', mastery: 40, fullMark: 100 }, // Weak subject
+  { subject: 'Chemistry', mastery: 85, fullMark: 100 },
+  { subject: 'Biology', mastery: 75, fullMark: 100 },
+];
+
+const focusData = [
+  { time: '9am', focus: 80 },
+  { time: '10am', focus: 95 },
+  { time: '11am', focus: 60 },
+  { time: '12pm', focus: 40 },
+  { time: '1pm', focus: 85 },
+];
+
+export default function Analytics() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Analytics & Focus</h1>
+        <p className="text-slate-400 mt-1">Parental Dashboard & Deep Performance Insights.</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Weak Subject Detection */}
+        <div className="glass-card p-6 rounded-2xl border-red-500/20">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold flex items-center gap-2 text-red-400">
+              <AlertTriangle className="w-5 h-5" /> Weak Subject Alert
+            </h2>
+          </div>
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-6">
+            <h3 className="font-bold text-red-400 text-lg">Physics</h3>
+            <p className="text-slate-300 text-sm mt-1">Mastery dropped to 40%. AI recommends downloading the 'Kinematics Basics' Study Pack.</p>
+            <button className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors">
+              Generate Recovery Plan
+            </button>
+          </div>
+
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={subjectMastery}>
+                <PolarGrid stroke="#374151" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: '#9ca3af', fontSize: 12 }} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} />
+                <Radar name="Mastery" dataKey="mastery" stroke="var(--color-neon-blue)" fill="var(--color-neon-blue)" fillOpacity={0.4} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Focus Monitoring */}
+        <div className="glass-card p-6 rounded-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold flex items-center gap-2 text-emerald-400">
+              <Activity className="w-5 h-5" /> Focus Monitoring
+            </h2>
+            <span className="text-xs font-bold px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-md">Live</span>
+          </div>
+          <p className="text-sm text-slate-400 mb-6">Real-time attention tracking via webcam/mouse activity heuristics.</p>
+          
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={focusData}>
+                <XAxis dataKey="time" stroke="#4b5563" tick={{fill: '#9ca3af'}} />
+                <Tooltip 
+                  cursor={{fill: 'rgba(255,255,255,0.05)'}}
+                  contentStyle={{ backgroundColor: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                />
+                <Bar dataKey="focus" fill="var(--color-emerald-400)" radius={[4, 4, 0, 0]}>
+                  {
+                    focusData.map((entry, index) => (
+                      <cell key={`cell-${index}`} fill={entry.focus < 50 ? '#ef4444' : '#34d399'} />
+                    ))
+                  }
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 p-3 bg-white/5 rounded-lg flex items-start gap-3">
+            <TrendingUp className="w-5 h-5 text-neon-purple mt-0.5" />
+            <p className="text-sm text-slate-300">Focus usually drops around 12pm. Smart Scheduler will automatically propose breaks during this time tomorrow.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
