@@ -112,7 +112,7 @@ export default function Quiz() {
                 className={`w-full text-left p-5 rounded-2xl border-2 transition-all duration-300 ${stateClass}`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${isAnswered && i === mockQuestion.correct ? 'bg-emerald-500 text-dark-bg' : 'bg-white/10'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${isAnswered && i === question.correct ? 'bg-emerald-500 text-dark-bg' : 'bg-white/10'}`}>
                     {String.fromCharCode(65 + i)}
                   </div>
                   <span className="text-lg">{opt}</span>

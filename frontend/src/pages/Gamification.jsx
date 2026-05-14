@@ -1,12 +1,5 @@
+import { useState, useEffect } from 'react';
 import { Trophy, Star, Medal, Crown, Shield, Zap } from 'lucide-react';
-
-const leaderboardData = [
-  { rank: 1, name: 'Sarah J.', xp: 15420, level: 45, isCurrentUser: false },
-  { rank: 2, name: 'Alex Student', xp: 14890, level: 42, isCurrentUser: true },
-  { rank: 3, name: 'Michael K.', xp: 14100, level: 40, isCurrentUser: false },
-  { rank: 4, name: 'Emma T.', xp: 13500, level: 38, isCurrentUser: false },
-  { rank: 5, name: 'David L.', xp: 12900, level: 35, isCurrentUser: false },
-];
 
 const badges = [
   { name: 'Quantum Leap', desc: 'Aced 5 Physics tests in a row', icon: Zap, color: 'text-neon-blue', bg: 'bg-neon-blue/10' },
@@ -16,6 +9,29 @@ const badges = [
 ];
 
 export default function Gamification() {
+  const [currentUserName, setCurrentUserName] = useState('Alex Student');
+  const [currentXP, setCurrentXP] = useState(14890);
+  const [currentLevel, setCurrentLevel] = useState(42);
+
+  useEffect(() => {
+    const storedCustomName = localStorage.getItem('customName');
+    const email = localStorage.getItem('email') || '';
+    const xp = parseInt(localStorage.getItem('xp') || '0');
+
+    const name = storedCustomName || (email ? email.split('@')[0].replace(/\b\w/g, (c) => c.toUpperCase()) : 'Alex Student');
+    setCurrentUserName(name);
+    setCurrentXP(xp || 14890);
+    setCurrentLevel(Math.floor((xp || 14890) / 100) + 1);
+  }, []);
+
+  const leaderboardData = [
+    { rank: 1, name: 'Sarah J.', xp: 15420, level: 45, isCurrentUser: false },
+    { rank: 2, name: currentUserName, xp: currentXP, level: currentLevel, isCurrentUser: true },
+    { rank: 3, name: 'Michael K.', xp: 14100, level: 40, isCurrentUser: false },
+    { rank: 4, name: 'Emma T.', xp: 13500, level: 38, isCurrentUser: false },
+    { rank: 5, name: 'David L.', xp: 12900, level: 35, isCurrentUser: false },
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -26,7 +42,7 @@ export default function Gamification() {
         <div className="flex gap-4">
           <div className="glass-panel px-6 py-3 rounded-2xl flex flex-col items-center border-orange-500/30">
             <span className="text-xs text-slate-400 font-medium tracking-wider uppercase">Total XP</span>
-            <span className="text-2xl font-black text-orange-400 tracking-tight">14,890</span>
+            <span className="text-2xl font-black text-orange-400 tracking-tight">{currentXP.toLocaleString()}</span>
           </div>
           <div className="glass-panel px-6 py-3 rounded-2xl flex flex-col items-center border-neon-blue/30">
             <span className="text-xs text-slate-400 font-medium tracking-wider uppercase">Level</span>
@@ -41,24 +57,22 @@ export default function Gamification() {
           <h2 className="text-xl font-bold flex items-center gap-2 mb-6">
             <Trophy className="w-6 h-6 text-yellow-400" /> Global Leaderboard
           </h2>
-          
+
           <div className="space-y-3">
             {leaderboardData.map((user) => (
-              <div 
+              <div
                 key={user.rank}
-                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
-                  user.isCurrentUser 
-                    ? 'bg-gradient-to-r from-neon-purple/20 to-neon-blue/20 border-neon-purple/50 shadow-[0_0_15px_rgba(176,38,255,0.2)]' 
-                    : 'bg-dark-surface/50 border-white/5 hover:bg-white/5'
-                }`}
+                className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${user.isCurrentUser
+                  ? 'bg-gradient-to-r from-neon-purple/20 to-neon-blue/20 border-neon-purple/50 shadow-[0_0_15px_rgba(176,38,255,0.2)]'
+                  : 'bg-dark-surface/50 border-white/5 hover:bg-white/5'
+                  }`}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                    user.rank === 1 ? 'bg-yellow-400 text-black shadow-[0_0_15px_rgba(250,204,21,0.5)]' :
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${user.rank === 1 ? 'bg-yellow-400 text-black shadow-[0_0_15px_rgba(250,204,21,0.5)]' :
                     user.rank === 2 ? 'bg-slate-300 text-black' :
-                    user.rank === 3 ? 'bg-amber-600 text-white' :
-                    'bg-white/10 text-slate-300'
-                  }`}>
+                      user.rank === 3 ? 'bg-amber-600 text-white' :
+                        'bg-white/10 text-slate-300'
+                    }`}>
                     {user.rank}
                   </div>
                   <div>
@@ -94,7 +108,7 @@ export default function Gamification() {
               ))}
             </div>
           </div>
-          
+
           <div className="glass-card p-6 rounded-3xl bg-gradient-to-br from-brand-900/40 to-dark-bg border-brand-500/30 text-center">
             <h3 className="font-bold text-lg mb-2">Next Milestone</h3>
             <p className="text-sm text-slate-400 mb-4">Reach Level 50 to unlock the 'Grandmaster' title and premium avatar frames.</p>

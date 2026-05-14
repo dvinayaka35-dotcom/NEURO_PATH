@@ -5,6 +5,7 @@ from database import create_db
 from routers import quiz
 from routers import progress
 from routers import hints
+from routers import auth
 
 app = FastAPI(
     title="EduAI Backend",
@@ -25,6 +26,7 @@ create_db()
 app.include_router(quiz.router)
 app.include_router(progress.router)
 app.include_router(hints.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def home():

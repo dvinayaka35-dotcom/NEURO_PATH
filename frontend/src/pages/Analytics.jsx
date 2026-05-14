@@ -1,5 +1,7 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
-import { Activity, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Activity, AlertTriangle, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react';
 
 const subjectMastery = [
   { subject: 'Algebra', mastery: 90, fullMark: 100 },
@@ -18,6 +20,20 @@ const focusData = [
 ];
 
 export default function Analytics() {
+  const [showRecoveryPlan, setShowRecoveryPlan] = useState(false);
+  const navigate = useNavigate();
+
+  const recoverySteps = [
+    'Review motion equations and units for 15 minutes.',
+    'Complete the Kinematics Basics study pack.',
+    'Take one adaptive Physics quiz and revisit missed questions.',
+  ];
+
+  const openStudyPack = () => {
+    localStorage.setItem('recommendedStudyPack', 'kinematics-basics');
+    navigate('/study-packs?recommended=kinematics-basics');
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -36,10 +52,50 @@ export default function Analytics() {
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-6">
             <h3 className="font-bold text-red-400 text-lg">Physics</h3>
             <p className="text-slate-300 text-sm mt-1">Mastery dropped to 40%. AI recommends downloading the 'Kinematics Basics' Study Pack.</p>
-            <button className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors">
-              Generate Recovery Plan
+            <button
+              type="button"
+              onClick={() => setShowRecoveryPlan(true)}
+              className="mt-3 px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors"
+            >
+              {showRecoveryPlan ? 'Recovery Plan Ready' : 'Generate Recovery Plan'}
             </button>
           </div>
+
+          {showRecoveryPlan && (
+            <div className="mb-6 rounded-xl border border-red-500/20 bg-slate-950/40 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-white">Physics Recovery Plan</h3>
+              </div>
+              <div className="space-y-3">
+                {recoverySteps.map((step, index) => (
+                  <div key={step} className="flex gap-3 text-sm text-slate-300">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/20 text-xs font-bold text-red-300">
+                      {index + 1}
+                    </span>
+                    <span>{step}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={openStudyPack}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-neon-blue px-4 py-2 text-sm font-semibold text-white hover:bg-neon-blue/90 transition-colors"
+                >
+                  <BookOpen className="w-4 h-4" />
+                  Open Kinematics Basics
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/quiz')}
+                  className="rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/10 transition-colors"
+                >
+                  Start Physics Quiz
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">

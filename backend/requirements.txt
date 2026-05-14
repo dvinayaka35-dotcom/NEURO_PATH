@@ -1,5 +1,8 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlmodel
 python-dotenv
 openai
+passlib[bcrypt]
+python-jose[cryptography]
+email-validator
