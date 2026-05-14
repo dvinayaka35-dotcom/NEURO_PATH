@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "question": "What is React?",
+        "options": [
+            "Library",
+            "Database",
+            "OS",
+            "Compiler"
+        ],
+        "answer": "Library",
+        "difficulty": "easy"
+    },
+    {
+        "id": 2,
+        "question": "Explain recursion.",
+        "options": [
+            "Loop",
+            "Function calling itself",
+            "Array",
+            "Sorting"
+        ],
+        "answer": "Function calling itself",
+        "difficulty": "medium"
+    }
+]
