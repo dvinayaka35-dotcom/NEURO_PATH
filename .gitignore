@@ -1,0 +1,14 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+backend/.venv/
+
+# Environment variables
+.env
+
+# IDE files
+.vscode/
+*.swp
