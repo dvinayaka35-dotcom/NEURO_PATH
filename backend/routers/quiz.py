@@ -9,7 +9,7 @@ router = APIRouter(
 @router.get("/questions")
 def get_questions():
 
-    with open("questions.json", "r") as file:
+    with open("questions.jason", "r") as file:
         questions = json.load(file)
 
     return questions
