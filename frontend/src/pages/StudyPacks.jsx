@@ -8,39 +8,48 @@ export default function StudyPacks() {
     const recommendedPack = searchParams.get('recommended') || localStorage.getItem('recommendedStudyPack');
     const packs = useMemo(() => [
         {
-            id: 'kinematics-basics',
-            title: 'Kinematics Basics',
-            description: 'Velocity, acceleration, motion graphs, and core equations for Physics recovery.',
+            id: 'core-java',
+            title: 'Core Java',
+            description: 'Object-oriented principles, classes, objects, and core syntax for JAVA recovery.',
             color: 'from-red-500 to-slate-800',
+            link: 'https://www.w3schools.com/java/',
         },
         {
-            id: 'math-foundations',
-            title: 'Math Foundations',
-            description: 'Core algebra, geometry, and problem solving.',
+            id: 'dws-foundations',
+            title: 'DWS Foundations',
+            description: 'Core principles of Data Warehousing and Data Mining.',
             color: 'from-neon-blue to-slate-800',
+            link: 'https://www.w3schools.com/tutorials/',
         },
         {
-            id: 'physics-revision',
-            title: 'Physics Revision',
-            description: 'Mechanics, energy, and exam-style practice.',
+            id: 'set-revision',
+            title: 'SE&T Revision',
+            description: 'Software Engineering and Testing methodologies, lifecycles, and practices.',
             color: 'from-neon-purple to-slate-800',
+            link: 'https://www.geeksforgeeks.org/software-engineering/software-engineering/',
         },
         {
-            id: 'chemistry-essentials',
-            title: 'Chemistry Essentials',
-            description: 'Atomic structure, reactions, and formulas.',
+            id: 'bi-essentials',
+            title: 'BI Essentials',
+            description: 'Business Intelligence concepts, analytics, and reporting tools.',
             color: 'from-emerald-400 to-slate-800',
+            link: 'https://www.geeksforgeeks.org/power-bi/what-is-business-intelligence/',
         },
         {
-            id: 'sat-prep',
-            title: 'SAT Prep',
-            description: 'Timed practice and strategy for exam day.',
+            id: 'java-advanced',
+            title: 'Advanced JAVA Prep',
+            description: 'Multithreading, streams, collections, and advanced concepts.',
             color: 'from-orange-400 to-slate-800',
+            link: 'https://www.geeksforgeeks.org/advance-java/advanced-java/',
         },
     ], []);
 
-    const startPack = (packId) => {
-        localStorage.setItem('activeStudyPack', packId);
+    const startPack = (pack) => {
+        if (pack.link) {
+            window.open(pack.link, '_blank', 'noopener,noreferrer');
+            return;
+        }
+        localStorage.setItem('activeStudyPack', pack.id);
         navigate('/quiz');
     };
 
@@ -85,7 +94,7 @@ export default function StudyPacks() {
                         </div>
                         <button
                             type="button"
-                            onClick={() => startPack(pack.id)}
+                            onClick={() => startPack(pack)}
                             className="mt-4 px-4 py-3 rounded-2xl bg-neon-blue text-white font-semibold hover:bg-neon-blue/90 transition-colors"
                         >
                             Start Pack

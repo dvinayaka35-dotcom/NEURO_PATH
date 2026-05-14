@@ -4,11 +4,10 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 import { Activity, AlertTriangle, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react';
 
 const subjectMastery = [
-  { subject: 'Algebra', mastery: 90, fullMark: 100 },
-  { subject: 'Geometry', mastery: 65, fullMark: 100 },
-  { subject: 'Physics', mastery: 40, fullMark: 100 }, // Weak subject
-  { subject: 'Chemistry', mastery: 85, fullMark: 100 },
-  { subject: 'Biology', mastery: 75, fullMark: 100 },
+  { subject: 'DWS', mastery: 90, fullMark: 100 },
+  { subject: 'SE&T', mastery: 85, fullMark: 100 },
+  { subject: 'JAVA', mastery: 40, fullMark: 100 }, // Weak subject
+  { subject: 'BI', mastery: 75, fullMark: 100 },
 ];
 
 const focusData = [
@@ -24,14 +23,14 @@ export default function Analytics() {
   const navigate = useNavigate();
 
   const recoverySteps = [
-    'Review motion equations and units for 15 minutes.',
-    'Complete the Kinematics Basics study pack.',
-    'Take one adaptive Physics quiz and revisit missed questions.',
+    'Review object-oriented principles and classes for 15 minutes.',
+    'Complete the Core Java study pack.',
+    'Take one adaptive JAVA quiz and revisit missed questions.',
   ];
 
   const openStudyPack = () => {
-    localStorage.setItem('recommendedStudyPack', 'kinematics-basics');
-    navigate('/study-packs?recommended=kinematics-basics');
+    localStorage.setItem('recommendedStudyPack', 'core-java');
+    navigate('/study-packs?recommended=core-java');
   };
 
   return (
@@ -50,8 +49,8 @@ export default function Analytics() {
             </h2>
           </div>
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-6">
-            <h3 className="font-bold text-red-400 text-lg">Physics</h3>
-            <p className="text-slate-300 text-sm mt-1">Mastery dropped to 40%. AI recommends downloading the 'Kinematics Basics' Study Pack.</p>
+            <h3 className="font-bold text-red-400 text-lg">JAVA</h3>
+            <p className="text-slate-300 text-sm mt-1">Mastery dropped to 40%. AI recommends downloading the 'Core Java' Study Pack.</p>
             <button
               type="button"
               onClick={() => setShowRecoveryPlan(true)}
@@ -65,7 +64,7 @@ export default function Analytics() {
             <div className="mb-6 rounded-xl border border-red-500/20 bg-slate-950/40 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                <h3 className="font-bold text-white">Physics Recovery Plan</h3>
+                <h3 className="font-bold text-white">JAVA Recovery Plan</h3>
               </div>
               <div className="space-y-3">
                 {recoverySteps.map((step, index) => (
@@ -84,14 +83,14 @@ export default function Analytics() {
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-neon-blue px-4 py-2 text-sm font-semibold text-white hover:bg-neon-blue/90 transition-colors"
                 >
                   <BookOpen className="w-4 h-4" />
-                  Open Kinematics Basics
+                  Open Core Java
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('/quiz')}
                   className="rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/10 transition-colors"
                 >
-                  Start Physics Quiz
+                  Start JAVA Quiz
                 </button>
               </div>
             </div>
