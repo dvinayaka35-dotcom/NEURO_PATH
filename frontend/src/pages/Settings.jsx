@@ -27,7 +27,7 @@ export default function Settings() {
 
   const fetchUserData = async () => {
     try {
-      const response = await api.get(`/user/me?email=${userData.email}`);
+      const response = await api.get('/user/me', { params: { email: userData.email || localStorage.getItem('email') } });
       setUserData(response.data);
       setSelectedTheme(response.data.theme);
       applyTheme(response.data.theme);
@@ -46,7 +46,7 @@ export default function Settings() {
 
   const fetchLoginActivity = async () => {
     try {
-      const response = await api.get(`/user/activity?email=${userData.email}`);
+      const response = await api.get('/user/activity', { params: { email: userData.email || localStorage.getItem('email') } });
       setLoginActivity(response.data);
     } catch (err) {
       console.error('Error fetching login activity', err);
@@ -161,7 +161,7 @@ export default function Settings() {
                   <label className="block text-sm text-slate-400 mb-2">Parent's Phone Number</label>
                   <input 
                     type="tel" 
-                    value={userData.parent_phone}
+                    value={userData.parent_phone || ''}
                     onChange={(e) => setUserData({...userData, parent_phone: e.target.value})}
                     className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 focus:border-neon-purple outline-none transition-all"
                   />

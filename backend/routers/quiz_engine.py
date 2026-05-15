@@ -39,16 +39,15 @@ SUBJECTS = {
         ],
         "content": "Business Intelligence (BI) involves the strategies and technologies used by enterprises for data analysis... [ETL and Data Warehousing]"
     },
-    "java_programming": {
-        "title": "Java Programming",
+    "python_programming": {
+        "title": "Python Programming",
         "modules": [
-            "1.0 Introduction to Java (5h)",
-            "2.0 Operators and Statements (2h)",
-            "3.0 Working with OOP’s (6h)",
-            "4.0 Packages and Interfaces (5h)",
-            "5.0 Exceptions"
+            "1.0 Introduction to Python (4h)",
+            "2.0 Python Data types and operators (10h)",
+            "3.0 Python Program Flow Control (6h)",
+            "4.0 Python Functions, Modules and Packages (4h)"
         ],
-        "content": "Java is a high-level, class-based, object-oriented programming language... [JVM, Classloaders, and Memory Management]"
+        "content": "Python is an interpreted, high-level and general-purpose programming language. Its design philosophy emphasizes code readability with its use of significant indentation. Python is dynamically-typed and garbage-collected. It supports multiple programming paradigms, including structured (particularly procedural), object-oriented and functional programming."
     }
 }
 
@@ -72,41 +71,63 @@ def get_subject_content(subject_id: str, level: int):
 def generate_quiz(subject_id: str, level: int):
     # COMPREHENSIVE TECHNICAL QUESTION BANK
     BANK = {
-        "java_programming": {
+        "python_programming": {
+            1: [ # Introduction to Python (4h)
+                {"q": "Who created Python?", "o": ["Guido van Rossum", "Elon Musk", "Bill Gates", "Mark Zuckerberg"], "a": 0},
+                {"q": "What is the correct file extension for Python files?", "o": [".pyt", ".py", ".pt", ".python"], "a": 1},
+                {"q": "Python is a ___ level language.", "o": ["Low", "Middle", "High", "Machine"], "a": 2},
+                {"q": "Is indentation mandatory in Python?", "o": ["No", "Yes", "Only for classes", "Only for strings"], "a": 1},
+                {"q": "Which of these is used to display output?", "o": ["echo", "print()", "printf", "console.log"], "a": 1}
+            ],
+            2: [ # Python Data types and operators (10h)
+                {"q": "Which of these is NOT a numeric type?", "o": ["int", "float", "complex", "list"], "a": 3},
+                {"q": "What is the output of 10 // 3?", "o": ["3.33", "3", "4", "3.0"], "a": 1},
+                {"q": "Which operator is used for power (x to the power y)?", "o": ["^", "**", "*", "pow"], "a": 1},
+                {"q": "What is the type of 'True'?", "o": ["string", "bool", "int", "None"], "a": 1},
+                {"q": "How do you add an element to a list?", "o": ["append()", "add()", "insert()", "Both append and insert"], "a": 3}
+            ],
+            3: [ # Python Program Flow Control (6h)
+                {"q": "Which statement is used for a multi-way branch?", "o": ["if-else", "switch", "elif", "case"], "a": 2},
+                {"q": "What is used to iterate over a sequence?", "o": ["while", "for", "do-while", "if"], "a": 1},
+                {"q": "Which keyword skips the current iteration?", "o": ["break", "stop", "continue", "pass"], "a": 2},
+                {"q": "What does 'pass' do?", "o": ["Exits the program", "Does nothing (placeholder)", "Skips error", "Returns True"], "a": 1}
+            ],
+            4: [ # Python Functions, Modules and Packages (4h)
+                {"q": "How to define a function?", "o": ["def name():", "function name():", "define name():", "void name():"], "a": 0},
+                {"q": "How to import a module?", "o": ["use math", "include math", "import math", "get math"], "a": 2},
+                {"q": "What is __init__.py used for?", "o": ["Initialize a variable", "Mark a directory as a package", "Start the program", "Clean memory"], "a": 1}
+            ]
+        },
+        "dynamic_websites": {
             1: [
-                {"q": "What is the result of 5 + '5' in Java?", "o": ["10", "55", "Error", "5"], "a": 1},
-                {"q": "Which keyword is used for inheritance?", "o": ["implements", "extends", "inherits", "derive"], "a": 1},
-                {"q": "What is JVM?", "o": ["Java Visual Machine", "Java Virtual Machine", "Java Vital Machine", "Java View Machine"], "a": 1},
-                {"q": "Which data type is used for characters?", "o": ["String", "char", "Character", "txt"], "a": 1},
-                {"q": "Is Java platform independent?", "o": ["No", "Yes", "Only on Windows", "Only on Linux"], "a": 1}
+                {"q": "What does HTML stand for?", "o": ["Hyper Text Markup Language", "High Tech Modern Language", "Hyperlink Text Management", "Home Tool Markup"], "a": 0},
+                {"q": "Which tag is used for the largest heading?", "o": ["<h6>", "<head>", "<h1>", "<header>"], "a": 2},
+                {"q": "What is the correct CSS syntax?", "o": ["{body;color:black;}", "body:color=black;", "body {color: black;}", "{body:color=black;}"], "a": 2},
+                {"q": "How do you call a function in JS?", "o": ["call myFunc()", "myFunc()", "call function myFunc()", "execute myFunc()"], "a": 1},
+                {"q": "Which property changes text color?", "o": ["text-color", "color", "font-style", "fg-color"], "a": 1}
             ],
             2: [
-                {"q": "What is the size of 'int' in Java?", "o": ["16-bit", "32-bit", "64-bit", "8-bit"], "a": 1},
-                {"q": "Which of these is a non-access modifier?", "o": ["public", "private", "static", "protected"], "a": 2},
-                {"q": "How to create an object in Java?", "o": ["class name()", "new class()", "create obj()", "object class()"], "a": 1},
-                {"q": "Which package is imported by default?", "o": ["java.util", "java.io", "java.lang", "java.net"], "a": 2},
-                {"q": "What is a constructor?", "o": ["A method", "A special method to initialize objects", "A class", "A variable"], "a": 1}
+                {"q": "Which attribute defines inline styles?", "o": ["class", "styles", "style", "font"], "a": 2},
+                {"q": "How to make a list with bullets?", "o": ["<ul>", "<ol>", "<list>", "<dl>"], "a": 0},
+                {"q": "Which JS event occurs on a click?", "o": ["onmouseclick", "onclick", "onchange", "onpress"], "a": 1},
+                {"q": "What is the purpose of 'box-sizing'?", "o": ["Set box shadow", "Include padding/border in width", "Resize elements", "Animate boxes"], "a": 1},
+                {"q": "How to select ID 'demo' in CSS?", "o": [".demo", "#demo", "demo", "*demo"], "a": 1}
+            ]
+        },
+        "software_engineering": {
+            1: [
+                {"q": "What is the first phase of SDLC?", "o": ["Testing", "Requirement Analysis", "Design", "Implementation"], "a": 1},
+                {"q": "What does CASE stand for?", "o": ["Computer Aided Software Engineering", "Control Access Software Engine", "Code Analysis System", "Common Application Setup"], "a": 0},
+                {"q": "Which model is the oldest SDLC?", "o": ["Spiral", "Agile", "Waterfall", "V-Model"], "a": 2},
+                {"q": "What is Black Box Testing?", "o": ["Testing internals", "Testing functionality without code access", "Performance testing", "Load testing"], "a": 1},
+                {"q": "What is a Bug?", "o": ["An insect", "An error in software", "A hardware failure", "A feature"], "a": 1}
             ],
-            3: [
-                {"q": "What is Polymorphism?", "o": ["Many forms", "Single form", "Code hiding", "Data wrapping"], "a": 0},
-                {"q": "Which keyword prevents method overriding?", "o": ["static", "final", "const", "private"], "a": 1},
-                {"q": "What is an Interface?", "o": ["A class", "A blueprint of a class", "An object", "A method"], "a": 1},
-                {"q": "Which of these handles exceptions?", "o": ["if-else", "try-catch", "for-loop", "switch-case"], "a": 1},
-                {"q": "Can a class implement multiple interfaces?", "o": ["No", "Yes", "Only two", "Only if abstract"], "a": 1}
-            ],
-            4: [
-                {"q": "What is the 'volatile' keyword for?", "o": ["Fast access", "Thread safety for variables", "Memory saving", "Garbage collection"], "a": 1},
-                {"q": "What is Reflection API?", "o": ["Mirroring code", "Inspecting classes at runtime", "Speeding up Java", "UI design"], "a": 1},
-                {"q": "What is a Deadlock?", "o": ["Computer crash", "Threads waiting for each other forever", "Infinite loop", "Memory leak"], "a": 1},
-                {"q": "Which collector is best for low-latency?", "o": ["Serial", "G1", "ZGC", "Parallel"], "a": 2},
-                {"q": "What is Type Erasure?", "o": ["Deleting code", "Removing generic type info at compile-time", "Runtime error", "Memory clear"], "a": 1}
-            ],
-            5: [
-                {"q": "Master: Explain JIT compilation strategy.", "o": ["Interprets only", "Compiles hot spots to machine code", "Saves to disk", "Deletes bytecode"], "a": 1},
-                {"q": "Master: What is 'Happens-Before' consistency?", "o": ["Time travel", "Memory visibility between threads", "Fast execution", "Pre-compilation"], "a": 1},
-                {"q": "Master: Explain the Fork/Join framework.", "o": ["Split and Merge tasks", "Copying classes", "Looping", "Garbage collection"], "a": 0},
-                {"q": "Master: What are Phantom References?", "o": ["Ghosts", "References for post-mortem cleanup", "Weak pointers", "Null objects"], "a": 1},
-                {"q": "Master: How does the Classloader hierarchy work?", "o": ["Randomly", "Delegation model (Bootstrap -> Extension -> App)", "Top-down only", "Parallel only"], "a": 1}
+            2: [
+                {"q": "What is Regression Testing?", "o": ["Testing new features", "Testing existing features after changes", "User testing", "Speed testing"], "a": 1},
+                {"q": "What is a Sprint in Agile?", "o": ["A race", "A short, timed work period", "A meeting", "A document"], "a": 1},
+                {"q": "Which is a Non-functional requirement?", "o": ["User login", "Performance", "Data entry", "Report generation"], "a": 1},
+                {"q": "What is a Unit Test?", "o": ["Testing the whole app", "Testing individual components", "Testing UI", "Testing DB"], "a": 1},
+                {"q": "What is the goal of Refactoring?", "o": ["Adding features", "Improving code structure without changing behavior", "Fixing bugs", "Deleting code"], "a": 1}
             ]
         },
         "business_intelligence": {
@@ -117,13 +138,19 @@ def generate_quiz(subject_id: str, level: int):
                 {"q": "What does ETL stand for?", "o": ["Eat Talk Listen", "Extract Transform Load", "Exit Top Level", "Enter Total List"], "a": 1},
                 {"q": "What is a Dashboard?", "o": ["A car part", "A visual display of data", "A database", "A spreadsheet"], "a": 1}
             ],
-            # ... levels 2-5 follow similar specific logic
+            2: [
+                {"q": "What is a Data Warehouse?", "o": ["A storage for old files", "A central repository for integrated data", "A server room", "A backup system"], "a": 1},
+                {"q": "What is Data Mining?", "o": ["Extracting minerals", "Discovering patterns in large datasets", "Writing code", "Building databases"], "a": 1},
+                {"q": "What does OLAP stand for?", "o": ["Online Analytical Processing", "On-Line Application Platform", "Open Layer Access Protocol", "Outer Link Analytical Part"], "a": 0},
+                {"q": "What is a KPI?", "o": ["Key Performance Indicator", "Key Project Info", "Knowledge Process Index", "Key Person Interest"], "a": 0},
+                {"q": "What is Data Visualization?", "o": ["Making data invisible", "Representing data graphically", "Encrypting data", "Deleting data"], "a": 1}
+            ]
         }
     }
     
-    # Get questions for subject and level, fallback to generic if not in bank
-    subject_bank = BANK.get(subject_id, BANK["java_programming"]) # Fallback to Java if needed for demo
-    lvl_questions = subject_bank.get(level, subject_bank[1])
+    # Get questions for subject and level, fallback to python if not in bank
+    subject_bank = BANK.get(subject_id, BANK["python_programming"]) 
+    lvl_questions = subject_bank.get(level, subject_bank.get(1, []))
     
     formatted = []
     for i, q in enumerate(lvl_questions):

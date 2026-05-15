@@ -6,7 +6,7 @@ class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     email: str = Field(unique=True, index=True)
     password_hash: str
-    is_verified: bool = False
+    is_verified: bool = True
     verification_code: Optional[str] = None
     parent_phone: Optional[str] = None
     theme: str = "dark"

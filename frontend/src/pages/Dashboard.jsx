@@ -27,31 +27,31 @@ export default function Dashboard() {
   ]);
 
   const subjectProjects = {
-    java_programming: [
+    python_programming: [
       { 
-        title: 'AI-Powered Smart ATM', 
-        reason: 'Java OOP + AI Integration',
-        brief: 'Build a secure ATM system using Java that uses facial recognition for authentication. Focus on Encapsulation for account security and Multithreading for handling concurrent transactions.'
+        title: 'Predictive Stock Analyzer', 
+        reason: 'Pandas + Data Analysis',
+        brief: 'Build a system that predicts stock market trends using Python. Use Pandas for data cleaning and Matplotlib for visualizing growth trends over time.'
       },
       { 
-        title: 'Secure Blockchain Ledger', 
-        reason: 'Advanced Data Structures',
-        brief: 'Create a decentralized transaction ledger using Linked Lists and Hashing. Implement a Proof-of-Work algorithm to ensure data integrity across nodes.'
+        title: 'Intelligent Web Scraper', 
+        reason: 'BeautifulSoup + Automation',
+        brief: 'Create a bot that automatically tracks product prices across multiple websites. Focus on error handling and data storage in CSV/JSON formats.'
       },
       { 
-        title: 'Predictive Inventory System', 
-        reason: 'File I/O + Analytics',
-        brief: 'Develop a system that predicts stock shortages using historical data stored in flat files. Focus on Java Collections Framework for efficient data manipulation.'
+        title: 'Machine Learning Image Classifier', 
+        reason: 'Scikit-Learn + AI',
+        brief: 'Develop an AI model that can distinguish between different types of objects in images. Use Scikit-learn for training and testing your model.'
       },
       { 
-        title: 'Multithreaded Chat Server', 
-        reason: 'Networking & Concurrency',
-        brief: 'Construct a high-performance chat server using Socket Programming. Implement thread pools to handle hundreds of simultaneous client connections without lag.'
+        title: 'Voice-Activated Assistant', 
+        reason: 'Speech Recognition + OS modules',
+        brief: 'Construct a personal assistant like Siri or Alexa. Implement modules that allow it to open apps, play music, and answer basic questions via voice.'
       },
       { 
-        title: 'Biometric Attendance App', 
-        reason: 'Java Swing + External APIs',
-        brief: 'A desktop application for schools that integrates fingerprint APIs. Use Java Swing for the UI and SQLite for local data persistence.'
+        title: 'Secure Password Vault', 
+        reason: 'Cryptography + File Security',
+        brief: 'A desktop application to store passwords securely. Use Python\'s cryptography library to encrypt and decrypt sensitive data stored locally.'
       }
     ],
     dynamic_websites: [
@@ -397,8 +397,8 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {(() => {
                 const defaultSubjects = [
-                  { id: 'java_programming', title: 'Java Programming' },
-                  { id: 'dynamic_websites', title: 'Dynamic Websites' },
+                  { id: 'python_programming', title: 'Python Programming', modules: ['Intro to Python', 'Data Types', 'Flow Control', 'Functions'], color: 'from-neon-blue to-blue-500' },
+                  { id: 'dynamic_websites', title: 'Dynamic Websites', modules: ['Intro', 'Design', 'Mobile', 'Database'], color: 'from-purple-500 to-pink-500' },
                   { id: 'software_engineering', title: 'Software Engineering' },
                   { id: 'business_intelligence', title: 'Business Intelligence' }
                 ];
@@ -515,10 +515,10 @@ export default function Dashboard() {
                 {(() => {
                   const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
                   const subjects = Object.values(progress);
-                  const targetSubject = subjects.find(s => s.status === 'lagging') || subjects[0] || { id: 'java_programming' };
+                  const targetSubject = subjects.find(s => s.status === 'lagging') || subjects[0] || { id: 'python_programming' };
                   
                   if (recMode === 'projects') {
-                    const projects = subjectProjects[targetSubject.id] || subjectProjects.java_programming;
+                    const projects = subjectProjects[targetSubject.id] || subjectProjects.python_programming;
                     return projects.map((proj, i) => (
                       <motion.div 
                         key={i} 

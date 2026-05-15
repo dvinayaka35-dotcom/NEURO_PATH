@@ -8,11 +8,13 @@ export default function StudyPacks() {
     const recommendedPack = searchParams.get('recommended') || localStorage.getItem('recommendedStudyPack');
     const packs = useMemo(() => [
         {
-            id: 'core-java',
-            title: 'Core Java',
-            description: 'Object-oriented principles, classes, objects, and core syntax for JAVA recovery.',
-            color: 'from-red-500 to-slate-800',
-            link: 'https://www.w3schools.com/java/',
+            id: 'python-foundations',
+            title: 'Python Foundations',
+            description: 'Core syntax, data types, lists, and indentation rules for Python mastery.',
+            duration: '4.5 Hours',
+            level: 'Beginner',
+            icon: '🐍',
+            link: 'https://docs.python.org/3/tutorial/index.html',
         },
         {
             id: 'dws-foundations',
@@ -36,11 +38,13 @@ export default function StudyPacks() {
             link: 'https://www.geeksforgeeks.org/power-bi/what-is-business-intelligence/',
         },
         {
-            id: 'java-advanced',
-            title: 'Advanced JAVA Prep',
-            description: 'Multithreading, streams, collections, and advanced concepts.',
-            color: 'from-orange-400 to-slate-800',
-            link: 'https://www.geeksforgeeks.org/advance-java/advanced-java/',
+            id: 'python-advanced',
+            title: 'Advanced Python Prep',
+            description: 'Decorators, generators, context managers, and high-level Pythonic patterns.',
+            duration: '8 Hours',
+            level: 'Advanced',
+            icon: '🔥',
+            link: 'https://realpython.com/advanced-python-concepts/',
         },
     ], []);
 

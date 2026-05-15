@@ -6,7 +6,7 @@ import { Activity, AlertTriangle, BookOpen, CheckCircle2, TrendingUp } from 'luc
 const subjectMastery = [
   { subject: 'DWS', mastery: 90, fullMark: 100 },
   { subject: 'SE&T', mastery: 85, fullMark: 100 },
-  { subject: 'JAVA', mastery: 40, fullMark: 100 }, // Weak subject
+  { subject: 'Python', mastery: 40, fullMark: 100 }, // Weak subject
   { subject: 'BI', mastery: 75, fullMark: 100 },
 ];
 
@@ -45,13 +45,14 @@ export default function Analytics() {
 
   const recoverySteps = [
     'Review object-oriented principles and classes for 15 minutes.',
-    'Complete the Core Java study pack.',
-    'Take one adaptive JAVA quiz and revisit missed questions.',
+    'Complete the Python Foundations study pack.',
+    'Take one adaptive Python quiz and revisit missed questions.',
+    'Build a small automation script using Python modules.'
   ];
 
-  const openStudyPack = () => {
-    localStorage.setItem('recommendedStudyPack', 'core-java');
-    navigate('/study-packs?recommended=core-java');
+  const handleStudyPackClick = () => {
+    localStorage.setItem('recommendedStudyPack', 'python-foundations');
+    navigate('/study-packs?recommended=python-foundations');
   };
 
   return (
@@ -70,8 +71,8 @@ export default function Analytics() {
             </h2>
           </div>
           <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 mb-6">
-            <h3 className="font-bold text-red-400 text-lg">JAVA</h3>
-            <p className="text-slate-300 text-sm mt-1">Mastery dropped to 40%. AI recommends downloading the 'Core Java' Study Pack.</p>
+            <h3 className="font-bold text-red-400 text-lg">Python</h3>
+            <p className="text-slate-300 text-sm mt-1">Mastery dropped to 40%. AI recommends downloading the 'Python Foundations' Study Pack.</p>
             <button
               type="button"
               onClick={() => setShowRecoveryPlan(true)}
@@ -85,7 +86,7 @@ export default function Analytics() {
             <div className="mb-6 rounded-xl border border-red-500/20 bg-slate-950/40 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                <h3 className="font-bold text-white">JAVA Recovery Plan</h3>
+                <h3 className="font-bold text-white">Python Recovery Plan</h3>
               </div>
               <div className="space-y-3">
                 {recoverySteps.map((step, index) => (
@@ -100,18 +101,17 @@ export default function Analytics() {
               <div className="mt-4 flex flex-col sm:flex-row gap-3">
                 <button
                   type="button"
-                  onClick={openStudyPack}
+                  onClick={handleStudyPackClick}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-neon-blue px-4 py-2 text-sm font-semibold text-white hover:bg-neon-blue/90 transition-colors"
                 >
                   <BookOpen className="w-4 h-4" />
-                  Open Core Java
+                  Open Python Kit
                 </button>
-                <button
-                  type="button"
+                <button 
                   onClick={() => navigate('/quiz')}
-                  className="rounded-lg border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/10 transition-colors"
+                  className="flex-1 py-3 rounded-xl border border-white/10 text-white text-xs font-bold hover:bg-white/5 transition-all"
                 >
-                  Start JAVA Quiz
+                  Start Python Quiz
                 </button>
               </div>
             </div>

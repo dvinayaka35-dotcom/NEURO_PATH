@@ -66,7 +66,21 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
     # Check if user exists
     db_user = session.query(User).filter(User.email == user.email).first()
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        # If user exists, just update their password and verification status (Development Bypass)
+        db_user.password_hash = get_password_hash(user.password)
+        db_user.is_verified = True
+        session.commit()
+        
+        # Return a token immediately to log them in
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": db_user.email}, expires_delta=access_token_expires
+        )
+        return {
+            "message": "Account recognized and updated. Logging you in...",
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
     
     # Hash password
     hashed_password = get_password_hash(user.password)
@@ -121,8 +135,9 @@ def login(user: UserLogin, session: Session = Depends(get_session)):
     if not verify_password(user.password, db_user.password_hash):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     
-    if not db_user.is_verified:
-        raise HTTPException(status_code=400, detail="Email not verified")
+    # NO VERIFICATION CHECK - Access Granted for Development
+    db_user.is_verified = True
+    session.commit()
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(

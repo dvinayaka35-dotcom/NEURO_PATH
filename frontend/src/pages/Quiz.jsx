@@ -4,38 +4,39 @@ import { Brain, Trophy, Timer, BookOpen, ChevronRight, CheckCircle2, XCircle, Al
 import api from '../api';
 
 const SUBJECTS = {
-    java_programming: {
-        id: "java_programming",
-        title: "Java Programming",
-        icon: "☕",
+    python_programming: {
+        id: "python_programming",
+        title: "Python Programming",
+        icon: "🐍",
         modules: [
-            "1.0 Introduction to Java (5h)",
-            "2.0 Operators and Statements (2h)",
-            "3.0 Working with OOP’s (6h)",
-            "4.0 Packages and Interfaces (5h)",
-            "5.0 Exceptions"
+            "1.0 Introduction to Python (4h)",
+            "2.0 Python Data types and operators (10h)",
+            "3.0 Python Program Flow Control (6h)",
+            "4.0 Python Functions, Modules and Packages (4h)"
         ],
-        description: "Build scalable, enterprise-grade applications with the world's most popular language.",
-        content: `INTRODUCTION TO JAVA ARCHITECTURE
-Java is a high-level, class-based, object-oriented programming language. Its defining feature is "Write Once, Run Anywhere" (WORA), achieved through the Java Virtual Machine (JVM).
+        description: "Organizes software design around objects and data structures containing fields.",
+        content: `INTRODUCTION TO PYTHON ARCHITECTURE
+Python is a high-level, interpreted, general-purpose programming language. Its design philosophy emphasizes code readability with its use of significant indentation.
 
-1. JVM, JRE, and JDK:
-- JVM (Java Virtual Machine): An abstract machine that provides a runtime environment in which Java bytecode can be executed.
-- JRE (Java Runtime Environment): Includes JVM and libraries used for running Java programs.
-- JDK (Java Development Kit): Includes JRE and development tools like the compiler (javac).
+1. PYTHON FUNDAMENTALS:
+- Interpreted Language: Python code is executed line by line, which makes debugging easier.
+- Dynamic Typing: You don't need to declare variable types; they are determined at runtime.
+- Indentation: Instead of curly braces, Python uses whitespace to define code blocks.
 
-2. OBJECT-ORIENTED PROGRAMMING (OOP) DEEP DIVE:
-- Encapsulation: Wrapping data (variables) and code (methods) together as a single unit. Use private variables with public getters/setters.
-- Inheritance: Creating new classes from existing ones to achieve reusability (uses the 'extends' keyword).
-- Polymorphism: The ability of an object to take on many forms. Method Overloading (compile-time) and Method Overriding (runtime).
-- Abstraction: Hiding implementation details and showing only functionality (uses abstract classes and interfaces).
+2. CORE DATA STRUCTURES:
+- Lists: Ordered, mutable sequences of elements.
+- Tuples: Ordered, immutable sequences of elements.
+- Dictionaries: Key-value pairs for efficient data retrieval.
+- Sets: Unordered collections of unique elements.
 
-3. MEMORY MANAGEMENT:
-- Stack Memory: Used for static memory allocation and thread execution. It contains primitive values and references to objects in the heap.
-- Heap Memory: Used for dynamic memory allocation of Java objects and JRE classes at runtime.
+3. PROGRAM FLOW & FUNCTIONS:
+- Control Flow: Using if, elif, else for decision making, and for/while for loops.
+- Functions: Defined using the 'def' keyword, promoting code reusability.
+- Modules: Python files containing code that can be imported and used in other scripts.
 
-4. EXCEPTION HANDLING:
-Java uses a robust hierarchy (Throwable -> Error/Exception) to handle runtime errors, ensuring the application doesn't crash unexpectedly.`
+4. ERROR HANDLING & PACKAGES:
+- Try-Except: Python's way of handling exceptions cleanly.
+- PIP: The standard package manager used to install and manage additional libraries.`
     },
     dynamic_websites: {
         id: "dynamic_websites",
@@ -148,11 +149,11 @@ export default function Quiz() {
     useEffect(() => {
         const scheduledTopic = localStorage.getItem('scheduledTopic');
         if (scheduledTopic) {
-            const subjectId = Object.keys(SUBJECTS).find(key => 
+            const subjectId = Object.keys(SUBJECTS).find(key =>
                 SUBJECTS[key].title.toLowerCase().includes(scheduledTopic.toLowerCase()) ||
                 scheduledTopic.toLowerCase().includes(SUBJECTS[key].title.toLowerCase())
             );
-            
+
             if (subjectId) {
                 setSelectedSubject(SUBJECTS[subjectId]);
                 setView('study'); // Go directly to study/module view
@@ -226,7 +227,7 @@ export default function Quiz() {
         setStudyTimer(600); // RESET TO 10 MINS FOR EACH LEVEL
         setIsStudyComplete(false);
         setScore(0);
-        
+
         try {
             const res = await api.get(`/quiz/subjects/${selectedSubject.id}/${level}`);
             setRealContent(res.data.content);
@@ -238,17 +239,17 @@ export default function Quiz() {
 
     const saveProgress = (lvl, resultScore, passed) => {
         const currentProgress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
-        const subjectData = currentProgress[selectedSubject.id] || { 
-            title: selectedSubject.title, 
-            highestLevel: 0, 
-            lastScore: 0, 
-            status: 'neutral' 
+        const subjectData = currentProgress[selectedSubject.id] || {
+            title: selectedSubject.title,
+            highestLevel: 0,
+            lastScore: 0,
+            status: 'neutral'
         };
 
         if (passed) {
             subjectData.highestLevel = Math.max(subjectData.highestLevel, lvl);
             subjectData.status = 'improving';
-            
+
             // Update XP for passing
             const currentXP = parseInt(localStorage.getItem('xp') || '0');
             localStorage.setItem('xp', (currentXP + 50).toString());
@@ -264,7 +265,7 @@ export default function Quiz() {
 
         currentProgress[selectedSubject.id] = subjectData;
         localStorage.setItem('neuroPathProgress', JSON.stringify(currentProgress));
-        
+
         // Trigger profile update
         window.dispatchEvent(new Event('profileUpdate'));
     };
@@ -298,7 +299,7 @@ export default function Quiz() {
         <div className="p-8 max-w-6xl mx-auto min-h-screen">
             <AnimatePresence mode="wait">
                 {view === 'selection' && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
@@ -345,7 +346,7 @@ export default function Quiz() {
                 )}
 
                 {view === 'study' && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="glass-card rounded-3xl border border-white/10 overflow-hidden"
@@ -380,13 +381,13 @@ export default function Quiz() {
                                     ))}
                                 </ul>
                             </div>
-                            
+
                             <div className="prose prose-invert max-w-none">
                                 <h3 className="text-xl font-bold mb-4">Core Concepts & Study Material</h3>
                                 <div className="p-6 bg-neon-blue/5 border border-neon-blue/10 rounded-2xl text-slate-300 leading-relaxed whitespace-pre-wrap font-medium">
                                     {realContent || "Loading study material from AI brain..."}
                                 </div>
-                                
+
                                 <div className="mt-8 p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center gap-4">
                                     <AlertTriangle className="w-6 h-6 text-amber-500" />
                                     <p className="text-sm text-amber-200">
@@ -400,11 +401,10 @@ export default function Quiz() {
                             <button
                                 disabled={!isStudyComplete}
                                 onClick={() => fetchQuestions(currentLevel)}
-                                className={`px-10 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 ${
-                                    isStudyComplete 
-                                    ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white hover:scale-105 shadow-[0_0_20px_rgba(0,240,255,0.4)]' 
+                                className={`px-10 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 ${isStudyComplete
+                                    ? 'bg-gradient-to-r from-neon-blue to-neon-purple text-white hover:scale-105 shadow-[0_0_20px_rgba(0,240,255,0.4)]'
                                     : 'bg-white/5 text-slate-500 cursor-not-allowed border border-white/10'
-                                }`}
+                                    }`}
                             >
                                 START LEVEL {currentLevel} ASSESSMENT <ChevronRight className="w-5 h-5" />
                             </button>
@@ -413,18 +413,17 @@ export default function Quiz() {
                 )}
 
                 {view === 'quiz' && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="max-w-3xl mx-auto space-y-8"
                     >
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-4">
-                                <div className={`p-2 rounded-lg font-bold ${
-                                    currentLevel === 1 ? 'bg-emerald-500/20 text-emerald-500' :
+                                <div className={`p-2 rounded-lg font-bold ${currentLevel === 1 ? 'bg-emerald-500/20 text-emerald-500' :
                                     currentLevel === 2 ? 'bg-orange-500/20 text-orange-500' :
-                                    'bg-red-500/20 text-red-500'
-                                }`}>
+                                        'bg-red-500/20 text-red-500'
+                                    }`}>
                                     LEVEL {currentLevel}
                                 </div>
                                 <div className="text-slate-400 font-medium">
@@ -437,7 +436,7 @@ export default function Quiz() {
                         </div>
 
                         <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                            <motion.div 
+                            <motion.div
                                 className="h-full bg-gradient-to-r from-neon-blue to-neon-purple"
                                 initial={{ width: 0 }}
                                 animate={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
@@ -448,7 +447,7 @@ export default function Quiz() {
                             <div className="absolute top-0 right-0 p-8 opacity-5">
                                 <Brain className="w-40 h-40" />
                             </div>
-                            
+
                             <h2 className="text-2xl font-bold leading-relaxed mb-8 relative z-10">
                                 {questions[currentIndex].question}
                             </h2>
@@ -466,12 +465,11 @@ export default function Quiz() {
                                             key={idx}
                                             disabled={isAnswered}
                                             onClick={() => handleAnswer(idx)}
-                                            className={`w-full p-6 rounded-2xl text-left font-medium transition-all flex items-center justify-between border ${
-                                                state === 'correct' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' :
+                                            className={`w-full p-6 rounded-2xl text-left font-medium transition-all flex items-center justify-between border ${state === 'correct' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' :
                                                 state === 'wrong' ? 'bg-red-500/20 border-red-500/50 text-red-400' :
-                                                selectedAnswer === idx ? 'bg-neon-blue/20 border-neon-blue text-neon-blue' :
-                                                'bg-white/5 border-white/10 hover:bg-white/10'
-                                            }`}
+                                                    selectedAnswer === idx ? 'bg-neon-blue/20 border-neon-blue text-neon-blue' :
+                                                        'bg-white/5 border-white/10 hover:bg-white/10'
+                                                }`}
                                         >
                                             <span className="flex items-center gap-4">
                                                 <span className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs border border-white/10">
@@ -487,7 +485,7 @@ export default function Quiz() {
                             </div>
 
                             {isAnswered && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className="mt-8 flex justify-between items-center"
@@ -516,7 +514,7 @@ export default function Quiz() {
                 )}
 
                 {view === 'result' && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         className="max-w-2xl mx-auto glass-card p-12 rounded-[3rem] border border-white/10 text-center space-y-8"
@@ -524,7 +522,7 @@ export default function Quiz() {
                         <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl mx-auto flex items-center justify-center shadow-[0_0_40px_rgba(251,191,36,0.4)]">
                             <Trophy className="w-12 h-12 text-white" />
                         </div>
-                        
+
                         <div>
                             <h2 className="text-4xl font-black italic tracking-tighter mb-2">CONGRATULATIONS!</h2>
                             <p className="text-slate-400 uppercase tracking-widest text-sm font-bold">Module Certification Complete</p>

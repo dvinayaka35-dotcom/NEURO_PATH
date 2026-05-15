@@ -49,7 +49,7 @@ export default function TopBar() {
 
   const notifications = [
     { id: 1, text: "Focus streak: 3 days!", time: "2h ago" },
-    { id: 2, text: "New Java Quiz available", time: "4h ago" },
+    { id: 2, text: "New Python Quiz available", time: "4h ago" },
     { id: 3, text: "Welcome to NeuroPath", time: "1d ago" }
   ];
 
@@ -83,7 +83,7 @@ export default function TopBar() {
     { title: 'Profile', path: '/profile', description: 'View your account' },
     { title: 'Settings', path: '/settings', description: 'System preferences' },
     // Subjects
-    { title: 'Java Programming', path: '/quiz', description: 'Object-Oriented Programming (OOP) Deep Dive' },
+    { title: 'Python Programming', path: '/quiz', description: 'Organizes software design around objects and data structures' },
     { title: 'Dynamic Websites', path: '/quiz', description: 'Responsive Web & Full-Stack Development' },
     { title: 'Software Engineering', path: '/quiz', description: 'Testing Techniques & SDLC' },
     { title: 'Business Intelligence', path: '/quiz', description: 'ETL Process & Data Architecture' }

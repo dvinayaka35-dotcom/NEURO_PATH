@@ -24,6 +24,7 @@ const navItems = [
 
 export default function Sidebar() {
     const [isFocusMode, setIsFocusMode] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleFocusMode = (e) => {

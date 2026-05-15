@@ -8,7 +8,21 @@ export default function Scheduler() {
     const navigate = useNavigate();
     const [sessions, setSessions] = useState(() => {
         const saved = localStorage.getItem('studySessions');
-        return saved ? JSON.parse(saved) : [];
+        if (!saved) return [];
+        
+        // AUTO-MIGRATION: Convert Java sessions to Python
+        let parsed = JSON.parse(saved);
+        const migrated = parsed.map(s => {
+            if (s.title === 'Java Programming' || s.title.toLowerCase().includes('java')) {
+                return { ...s, title: 'Python Programming' };
+            }
+            return s;
+        });
+        
+        if (JSON.stringify(parsed) !== JSON.stringify(migrated)) {
+            localStorage.setItem('studySessions', JSON.stringify(migrated));
+        }
+        return migrated;
     });
     const [isRecommending, setIsRecommending] = useState(false);
     const [missedAlert, setMissedAlert] = useState(null);
@@ -20,7 +34,7 @@ export default function Scheduler() {
 
     useEffect(() => {
         localStorage.setItem('studySessions', JSON.stringify(sessions));
-        
+
         const interval = setInterval(() => {
             const now = new Date();
             const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -89,12 +103,12 @@ export default function Scheduler() {
     const enterFullScreen = () => {
         const elem = document.documentElement;
         if (elem.requestFullscreen) {
-            elem.requestFullscreen().catch(() => {});
+            elem.requestFullscreen().catch(() => { });
         }
     };
 
     const exitFullScreen = () => {
-        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => { });
     };
 
     const startFocusMode = (session) => {
@@ -111,15 +125,15 @@ export default function Scheduler() {
             // Increase focus score only if session was fully completed
             const currentScore = parseInt(localStorage.getItem('focusScore') || '0');
             localStorage.setItem('focusScore', Math.min(100, currentScore + 10).toString());
-            
+
             // Mark session as completed
             setSessions(prev => prev.map(s => s.id === focusSession.id ? { ...s, completed: true } : s));
         }
-        
+
         const completedTopic = focusSession.title;
         setFocusSession(null);
         exitFullScreen();
-        
+
         localStorage.setItem('scheduledTopic', completedTopic);
         navigate('/quiz');
     };
@@ -127,24 +141,36 @@ export default function Scheduler() {
     const generateAITimetable = () => {
         setIsRecommending(true);
         setTimeout(() => {
-            const subjects = [
-                { id: 'java_programming', title: 'Java Programming' },
+            const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
+            const laggingSubject = Object.values(progress).find(s => s.status === 'lagging');
+
+            const baseSubjects = [
+                { id: 'python_programming', title: 'Python Programming' },
                 { id: 'dynamic_websites', title: 'Dynamic Websites' },
                 { id: 'software_engineering', title: 'Software Engineering' },
                 { id: 'business_intelligence', title: 'Business Intelligence' }
             ];
-            
+
+            // If there's a lagging subject, ensure it appears more frequently
+            const subjects = laggingSubject
+                ? [laggingSubject, ...baseSubjects.filter(s => s.id !== laggingSubject.id)]
+                : baseSubjects;
+
             const times = [{ t: '09:00 AM', d: '15m' }, { t: '11:00 AM', d: '15m' }, { t: '02:00 PM', d: '15m' }, { t: '04:00 PM', d: '15m' }];
 
             const newSessions = times.map((slot, i) => {
-                const sub = subjects[i % subjects.length];
+                // Use the prioritized subject for the first and third slots if lagging
+                const sub = (laggingSubject && (i === 0 || i === 2))
+                    ? laggingSubject
+                    : subjects[i % subjects.length];
+
                 return {
                     id: Date.now() + i,
-                    title: sub.title,
+                    title: sub.title || sub.id,
                     time: slot.t,
                     duration: '15m',
                     completed: false,
-                    status: 'normal'
+                    status: (laggingSubject && sub.id === laggingSubject.id) ? 'critical' : 'normal'
                 };
             });
             setSessions(newSessions);
@@ -162,13 +188,13 @@ export default function Scheduler() {
 
     if (focusSession) {
         return (
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="fixed inset-0 z-[9999] bg-[#020617] flex flex-col p-8 overflow-hidden"
             >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-neon-blue/5 via-transparent to-transparent opacity-50" />
-                
+
                 {/* Header with Timer */}
                 <div className="flex justify-between items-center relative z-10 mb-8 border-b border-white/10 pb-6">
                     <div className="flex items-center gap-4">
@@ -180,14 +206,14 @@ export default function Scheduler() {
                             <p className="text-neon-blue text-[10px] font-black tracking-widest uppercase">Deep Focus Reading</p>
                         </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-8">
                         <div className="text-center">
                             <div className="text-5xl font-black text-white tracking-tighter font-mono">
                                 {formatTime(timeLeft)}
                             </div>
                             <div className="w-full h-1 bg-white/10 rounded-full mt-2 overflow-hidden">
-                                <motion.div 
+                                <motion.div
                                     className="h-full bg-neon-blue shadow-[0_0_10px_#00f0ff]"
                                     initial={{ width: "100%" }}
                                     animate={{ width: `${(timeLeft / 900) * 100}%` }}
@@ -195,13 +221,13 @@ export default function Scheduler() {
                             </div>
                         </div>
                         <div className="flex gap-4">
-                            <button 
+                            <button
                                 onClick={() => setShowSidebar(!showSidebar)}
                                 className="px-6 py-3 rounded-xl border border-white/10 text-white font-black text-xs uppercase tracking-widest hover:bg-white/5 transition-all"
                             >
                                 {showSidebar ? 'Hide Goals' : 'Show Goals'}
                             </button>
-                            <button 
+                            <button
                                 onClick={() => endFocusMode(false)}
                                 className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-black text-xs uppercase tracking-widest hover:bg-red-500/10 hover:text-red-500 transition-all"
                             >
@@ -213,7 +239,7 @@ export default function Scheduler() {
 
                 {/* Content Area */}
                 <div className="flex-1 flex gap-8 relative z-10 overflow-hidden">
-                    <motion.div 
+                    <motion.div
                         layout
                         className={`${showSidebar ? 'lg:w-3/4' : 'w-full'} bg-white/[0.02] rounded-[2rem] border border-white/5 p-10 overflow-y-auto custom-scrollbar transition-all duration-500`}
                     >
@@ -223,7 +249,7 @@ export default function Scheduler() {
                                 <p className="text-slate-500 font-black uppercase tracking-widest text-xs">AI Generating Study Material...</p>
                             </div>
                         ) : (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="prose prose-invert max-w-none"
@@ -241,7 +267,7 @@ export default function Scheduler() {
                                     <div className="mt-12 p-8 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-center">
                                         <h3 className="text-2xl font-black text-emerald-400 uppercase italic mb-2">Session Complete!</h3>
                                         <p className="text-slate-400 mb-6">You've earned +10 Focus Score for staying the full 15 minutes.</p>
-                                        <button 
+                                        <button
                                             onClick={() => endFocusMode(true)}
                                             className="px-12 py-4 rounded-2xl bg-emerald-500 text-white font-black uppercase tracking-widest hover:scale-105 transition-all"
                                         >
@@ -255,7 +281,7 @@ export default function Scheduler() {
 
                     <AnimatePresence>
                         {showSidebar && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ x: 300, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 exit={{ x: 300, opacity: 0 }}
@@ -267,10 +293,10 @@ export default function Scheduler() {
                                     </h3>
                                     <ul className="space-y-4">
                                         {[
-                                            'Analyze the AI-provided insights',
-                                            'Note down technical definitions',
-                                            'Compare concepts with previous topics',
-                                            'Ready for Adaptive Quiz assessment'
+                                            'Analyze Python Indentation Rules',
+                                            'Note down core syntax definitions',
+                                            'Test small Python snippets in your mind',
+                                            'Prepare for Python Adaptive Quiz'
                                         ].map((goal, i) => (
                                             <li key={i} className="flex items-start gap-3 text-[11px] text-slate-400 font-medium leading-relaxed">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-neon-blue mt-1.5 flex-shrink-0" />
@@ -279,11 +305,11 @@ export default function Scheduler() {
                                         ))}
                                     </ul>
                                 </div>
-                                
+
                                 <div className="p-6 rounded-2xl bg-gradient-to-br from-neon-purple/20 to-transparent border border-neon-purple/20">
                                     <h3 className="text-xs font-black text-white uppercase tracking-widest mb-2">Neuro Tip</h3>
                                     <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
-                                        Focus on understanding the "Why" behind the technology. Deep comprehension beats rote memorization in the AI Adaptive Quiz.
+                                        Python relies on readability. Focus on the "Pythonic" way of writing code to maximize your mastery in the upcoming adaptive quiz.
                                     </p>
                                 </div>
                             </motion.div>
@@ -322,17 +348,17 @@ export default function Scheduler() {
                     <p className="text-slate-400 text-sm font-medium">Syncing with your AI Adaptive Quiz performance.</p>
                 </div>
                 <div className="flex gap-4">
-                    <button 
+                    <button
                         onClick={generateAITimetable}
                         disabled={isRecommending}
                         className="group relative px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest hover:border-neon-blue/50 transition-all disabled:opacity-50 overflow-hidden"
                     >
                         <span className="relative z-10 flex items-center gap-2">
-                            <Brain className={`w-5 h-5 text-neon-blue ${isRecommending ? 'animate-spin' : ''}`} /> 
+                            <Brain className={`w-5 h-5 text-neon-blue ${isRecommending ? 'animate-spin' : ''}`} />
                             {isRecommending ? 'Analyzing...' : 'AI Generate'}
                         </span>
                     </button>
-                    <button 
+                    <button
                         onClick={addSession}
                         className="px-8 py-4 rounded-2xl bg-gradient-to-r from-neon-blue to-neon-purple text-white font-black uppercase tracking-widest shadow-lg shadow-neon-blue/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2"
                     >
@@ -350,26 +376,23 @@ export default function Scheduler() {
 
                     <AnimatePresence mode='popLayout'>
                         {sessions.map((session) => (
-                            <motion.div 
+                            <motion.div
                                 key={session.id}
                                 layout
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className={`group p-1 rounded-[2rem] transition-all ${
-                                    session.completed ? 'opacity-60 grayscale' : 'hover:scale-[1.01]'
-                                }`}
+                                className={`group p-1 rounded-[2rem] transition-all ${session.completed ? 'opacity-60 grayscale' : 'hover:scale-[1.01]'
+                                    }`}
                             >
-                                <div className={`relative overflow-hidden p-6 rounded-[1.9rem] bg-slate-900/40 border-2 transition-all flex items-center justify-between ${
-                                    session.status === 'critical' ? 'border-red-500/20' :
-                                    session.completed ? 'border-white/5' : 'border-white/5 group-hover:border-neon-blue/30'
-                                }`}>
+                                <div className={`relative overflow-hidden p-6 rounded-[1.9rem] bg-slate-900/40 border-2 transition-all flex items-center justify-between ${session.status === 'critical' ? 'border-red-500/20' :
+                                        session.completed ? 'border-white/5' : 'border-white/5 group-hover:border-neon-blue/30'
+                                    }`}>
                                     <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent pointer-events-none" />
-                                    
+
                                     <div className="flex items-center gap-6 relative z-10">
-                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                                            session.completed ? 'bg-emerald-500/20 text-emerald-500' : 'bg-white/5 text-slate-500 group-hover:bg-neon-blue group-hover:text-white'
-                                        }`}>
+                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${session.completed ? 'bg-emerald-500/20 text-emerald-500' : 'bg-white/5 text-slate-500 group-hover:bg-neon-blue group-hover:text-white'
+                                            }`}>
                                             <Zap className="w-6 h-6" />
                                         </div>
                                         <div>
@@ -391,14 +414,14 @@ export default function Scheduler() {
 
                                     <div className="flex items-center gap-4 relative z-10">
                                         {!session.completed && (
-                                            <button 
+                                            <button
                                                 onClick={() => startFocusMode(session)}
                                                 className="px-6 py-3 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-neon-blue hover:text-white transition-all shadow-xl"
                                             >
                                                 Start Focus
                                             </button>
                                         )}
-                                        <button 
+                                        <button
                                             onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}
                                             className="p-3 rounded-xl text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
                                         >
@@ -437,7 +460,7 @@ export default function Scheduler() {
                                 <span>{focusScore}%</span>
                             </div>
                             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                <motion.div 
+                                <motion.div
                                     className="h-full bg-neon-blue"
                                     initial={{ width: 0 }}
                                     animate={{ width: `${focusScore}%` }}
@@ -454,15 +477,23 @@ export default function Scheduler() {
                                     <Target className="w-5 h-5 text-neon-purple" />
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                    <b className="text-white">COGNITIVE LOAD:</b> You study best between 10 AM and 12 PM. We've optimized your slots.
+                                    <b className="text-white">COGNITIVE LOAD:</b> Based on your {focusScore}% focus rate, we've optimized your study windows.
+                                </p>
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                                    <AlertTriangle className="w-5 h-5 text-red-500" />
+                                </div>
+                                <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                                    <b className="text-white text-red-400 uppercase tracking-tighter">LAGGING PERFORMANCE:</b> Mastery in <b className="text-neon-blue">Python Programming</b> is below 40%. Priority scheduling enabled.
                                 </p>
                             </div>
                             <div className="flex gap-4">
                                 <div className="w-10 h-10 rounded-xl bg-neon-blue/20 flex items-center justify-center flex-shrink-0">
-                                    <Zap className="w-5 h-5 text-neon-blue" />
+                                    <Brain className="w-5 h-5 text-neon-blue" />
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                    <b className="text-white">RETENTION:</b> Dynamic Websites needs a review. AI auto-added it to your plan.
+                                    <b className="text-white">SUGGESTED FOCUS:</b> Concentrate on <b className="text-neon-purple">Python Data Types</b> during your next session for maximum XP.
                                 </p>
                             </div>
                         </div>
