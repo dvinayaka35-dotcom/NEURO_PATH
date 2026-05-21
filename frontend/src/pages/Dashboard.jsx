@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [sessionTime, setSessionTime] = useState(0);
   const navigate = useNavigate();
 
+  const [recMode, setRecMode] = useState('projects'); // projects or qa
   const [selectedProject, setSelectedProject] = useState(null);
 
   const subjectProjects = {
