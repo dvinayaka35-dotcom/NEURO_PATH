@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: BrainCircuit, label: 'Explore Q&A', path: '/quiz' },
+  { icon: BrainCircuit, label: 'AI Adaptive Quiz', path: '/quiz' },
   { icon: LineChart, label: 'Analytics & Focus', path: '/analytics' },
   { icon: MessageSquare, label: 'AI Chat Bot', path: '/chat' },
   { icon: BookOpen, label: 'Study Packs', path: '/study-packs' },
