@@ -4,7 +4,7 @@ import TopBar from './components/TopBar';
 import Dashboard from './pages/Dashboard';
 import Quiz from './pages/Quiz';
 import Analytics from './pages/Analytics';
-import Gamification from './pages/Gamification';
+import Chat from './pages/Chat';
 import StudyPacks from './pages/StudyPacks';
 import Scheduler from './pages/Scheduler';
 import Profile from './pages/Profile';
@@ -51,7 +51,7 @@ function AppContent() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/quiz" element={<Quiz />} />
               <Route path="/analytics" element={<Analytics />} />
-              <Route path="/gamification" element={<Gamification />} />
+              <Route path="/chat" element={<Chat />} />
               <Route path="/study-packs" element={<StudyPacks />} />
               <Route path="/scheduler" element={<Scheduler />} />
             </Routes>

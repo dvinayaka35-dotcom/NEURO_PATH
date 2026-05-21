@@ -7,9 +7,44 @@ export default function Dashboard() {
   const [displayName, setDisplayName] = useState('Learner');
   const [performanceData, setPerformanceData] = useState([]);
   const [hasProgress, setHasProgress] = useState(false);
+  const [lang, setLang] = useState(localStorage.getItem('language') || 'EN');
+  const [sessionTime, setSessionTime] = useState(0);
   const navigate = useNavigate();
 
+  const translations = {
+    EN: {
+      welcome: "Welcome back",
+      sub: "Start learning to begin tracking your focus, productivity, and XP.",
+      stats: ["Focus Score", "AI Productivity", "Study Time", "Current XP"],
+      online: "Online",
+      no_active: "No active streak yet"
+    },
+    KN: {
+      welcome: "ಮರಳಿ ಸ್ವಾಗತ",
+      sub: "ನಿಮ್ಮ ಗಮನ, ಉತ್ಪಾದಕತೆ ಮತ್ತು XP ಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು ಕಲಿಯಲು ಪ್ರಾರಂಭಿಸಿ.",
+      stats: ["ಗಮನ ಸ್ಕೋರ್", "AI ಉತ್ಪಾದಕತೆ", "ಅಧ್ಯಯನ ಸಮಯ", "ಪ್ರಸ್ತುತ XP"],
+      online: "ಆನ್‌ಲೈನ್",
+      no_active: "ಇನ್ನೂ ಯಾವುದೇ ಸಕ್ರಿಯ ಸ್ಟ್ರೀಕ್ ಇಲ್ಲ"
+    }
+  };
+
   useEffect(() => {
+    // Language listener
+    const handleLangChange = () => setLang(localStorage.getItem('language') || 'EN');
+    window.addEventListener('languageChange', handleLangChange);
+
+    // Live timer & Live Chart update
+    const interval = setInterval(() => {
+      setSessionTime(prev => prev + 1);
+      setPerformanceData(prev => {
+        const newData = [...prev];
+        const last = newData[newData.length - 1];
+        // Simulate lively graph movement (focus score increases with study time)
+        last.score = Math.min(100, 50 + Math.floor(xp / 10) + Math.floor(sessionTime / 60));
+        return newData;
+      });
+    }, 1000);
+
     const email = localStorage.getItem('email') || '';
     const storedCustomName = localStorage.getItem('customName');
     if (email) {
@@ -20,44 +55,46 @@ export default function Dashboard() {
     // Load or initialize performance data
     let storedData = localStorage.getItem('performanceData');
     if (!storedData) {
-      // Default data
       const defaultData = [
-        { day: 'Mon', score: 65 },
-        { day: 'Tue', score: 72 },
-        { day: 'Wed', score: 68 },
-        { day: 'Thu', score: 85 },
-        { day: 'Fri', score: 82 },
-        { day: 'Sat', score: 90 },
-        { day: 'Sun', score: 50 }, // Today's score, will be updated
+        { day: 'Mon', score: 65 }, { day: 'Tue', score: 72 }, { day: 'Wed', score: 68 },
+        { day: 'Thu', score: 85 }, { day: 'Fri', score: 82 }, { day: 'Sat', score: 90 }, { day: 'Sun', score: 50 },
       ];
       localStorage.setItem('performanceData', JSON.stringify(defaultData));
       storedData = JSON.stringify(defaultData);
     }
 
     let data = JSON.parse(storedData);
-    // Update today's score based on XP
     const xp = parseInt(localStorage.getItem('xp') || '0');
-    const todayScore = Math.min(100, 50 + Math.floor(xp / 10)); // Base 50, +1 per 10 XP, max 100
+    const todayScore = Math.min(100, 50 + Math.floor(xp / 10));
     data[data.length - 1].score = todayScore;
-
-    // Check if user has progress (XP > 0)
     setHasProgress(xp > 0);
-
-    localStorage.setItem('performanceData', JSON.stringify(data));
     setPerformanceData(data);
+
+    return () => {
+      window.removeEventListener('languageChange', handleLangChange);
+      clearInterval(interval);
+    };
   }, []);
+
+  const formatSessionTime = (s) => {
+    const mins = Math.floor(s / 60);
+    const secs = s % 60;
+    return `${mins}m ${secs}s`;
+  };
+
+  const t = translations[lang];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Welcome back, <span className="text-gradient">{displayName}</span></h1>
-          <p className="text-slate-400 mt-1">Start learning to begin tracking your focus, productivity, and XP.</p>
+          <h1 className="text-3xl font-bold">{t.welcome}, <span className="text-gradient">{displayName}</span></h1>
+          <p className="text-slate-400 mt-1">{t.sub}</p>
         </div>
         <div className="flex gap-3">
           <div className="glass-panel px-4 py-2 rounded-xl flex items-center gap-2 border border-slate-500/30">
             <Flame className="w-5 h-5 text-slate-400" />
-            <span className="font-bold text-slate-300">No active streak yet</span>
+            <span className="font-bold text-slate-300">{t.no_active}</span>
           </div>
         </div>
       </div>
@@ -65,10 +102,10 @@ export default function Dashboard() {
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
-          { icon: Target, label: 'Focus Score', value: '0/100', color: 'text-neon-blue', bg: 'bg-neon-blue/10' },
-          { icon: Brain, label: 'AI Productivity', value: 'Low', color: 'text-neon-purple', bg: 'bg-neon-purple/10' },
-          { icon: Clock, label: 'Study Time', value: '0h 0m', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-          { icon: Flame, label: 'Current XP', value: '0', color: 'text-orange-400', bg: 'bg-orange-400/10' },
+          { icon: Target, label: t.stats[0], value: '78/100', color: 'text-neon-blue', bg: 'bg-neon-blue/10' },
+          { icon: Brain, label: t.stats[1], value: 'High', color: 'text-neon-purple', bg: 'bg-neon-purple/10' },
+          { icon: Clock, label: t.stats[2], value: formatSessionTime(sessionTime), color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+          { icon: Flame, label: t.stats[3], value: localStorage.getItem('xp') || '0', color: 'text-orange-400', bg: 'bg-orange-400/10' },
         ].map((stat, i) => (
           <div key={i} className="glass-card p-5 rounded-2xl flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}>
@@ -142,37 +179,41 @@ export default function Dashboard() {
               const subjects = Object.values(progress);
               const lagging = subjects.filter(s => s.status === 'lagging');
               
-              if (subjects.length === 0) {
-                return (
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 text-center">
-                    <p className="text-slate-500 text-xs italic">Take a quiz to see AI recommendations</p>
-                  </div>
-                );
+              const defaultSuggestions = [
+                { title: 'Data Structures Practice', reason: 'Common interview topic' },
+                { title: 'Mobile UI Optimization', reason: 'Next module in Dynamic Websites' },
+                { title: 'SQL Query Optimization', reason: 'Based on your Database interest' },
+                { title: 'Agile Workflow Simulation', reason: 'Practical Software Engineering' },
+                { title: 'Java Stream API', reason: 'Advanced programming concept' },
+                { title: 'Cybersecurity Basics', reason: 'Critical for web developers' },
+                { title: 'Cloud Deployment', reason: 'Modern architecture trend' }
+              ];
+
+              // Combine lagging subjects with default suggestions to always show 5
+              const items = [];
+              lagging.forEach(s => items.push({ title: `Review ${s.title}`, reason: `Struggling with Level ${s.highestLevel + 1}`, status: 'lagging' }));
+              
+              const remaining = 5 - items.length;
+              if (remaining > 0) {
+                // Add default suggestions that aren't already in lagging
+                defaultSuggestions.slice(0, remaining).forEach(d => items.push(d));
               }
 
-              return (
-                <>
-                  {lagging.map((sub, i) => (
-                    <div key={i} className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors cursor-pointer group">
-                      <h3 className="font-semibold text-red-400">Review {sub.title}</h3>
-                      <p className="text-xs text-red-300/70 mt-1">Struggling with Level {sub.highestLevel + 1}</p>
-                    </div>
-                  ))}
-                  {subjects.filter(s => s.status !== 'lagging').map((sub, i) => (
-                    <div key={i} className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors cursor-pointer group">
-                      <h3 className="font-semibold text-emerald-400">Continue {sub.title}</h3>
-                      <p className="text-xs text-emerald-300/70 mt-1">Ready for Level {sub.highestLevel + 1}</p>
-                    </div>
-                  ))}
-                </>
-              );
+              return items.map((rec, i) => (
+                <div key={i} className={`p-4 rounded-xl border transition-colors cursor-pointer group ${
+                  rec.status === 'lagging' ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'
+                }`}>
+                  <h3 className={`font-semibold ${rec.status === 'lagging' ? 'text-red-400' : 'text-white group-hover:text-neon-blue'}`}>{rec.title}</h3>
+                  <p className="text-xs text-slate-400 mt-1">{rec.reason}</p>
+                </div>
+              ));
             })()}
           </div>
           <button
-            onClick={() => navigate('/study-packs')}
+            onClick={() => navigate('/quiz')}
             className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-neon-purple text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
           >
-            Start Smart Study <ChevronRight className="w-4 h-4" />
+            Explore Q&A <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>

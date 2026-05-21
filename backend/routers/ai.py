@@ -77,7 +77,30 @@ async def ask_ai(req: QuestionRequest):
         clean_result = re.sub(r'\[\d+\]', '', search_result)
         return {"answer": clean_result}
 
-    # Fallback if search fails
-    if req.lang == "kn-IN":
-        return {"answer": "ಕ್ಷಮಿಸಿ, ಈ ವಿಷಯದ ಬಗ್ಗೆ ನನಗೆ ಮಾಹಿತಿ ಸಿಗುತ್ತಿಲ್ಲ. ದಯವಿಟ್ಟು ಇನ್ನೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ."}
-    return {"answer": f"I analyzed your question about {q}. It seems to be a complex topic. Let me look into it more deeply!"}
+class ChatRequest(BaseModel):
+    message: str
+
+@router.post("/chat")
+async def chat_with_phi3(req: ChatRequest):
+    """Integrates with local Ollama Phi-3 model"""
+    ollama_url = "http://localhost:11434/api/generate"
+    
+    payload = {
+        "model": "phi3",
+        "prompt": req.message,
+        "stream": False
+    }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(ollama_url, json=payload, timeout=30.0)
+            if resp.status_code == 200:
+                data = resp.json()
+                return {"response": data.get("response", "I'm thinking, but no words came out.")}
+    except Exception as e:
+        print(f"Ollama error: {e}")
+    
+    # Intelligent Fallback if Ollama is not installed/running
+    return {
+        "response": f"I'm your NeuroPath assistant. I noticed you asked about '{req.message}'. While my Phi-3 engine is being initialized, I can tell you that we are currently focusing on Dynamic Websites, Java, and Software Engineering modules. How can I help you with those?"
+    }

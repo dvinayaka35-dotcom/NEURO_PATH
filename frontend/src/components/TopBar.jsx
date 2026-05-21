@@ -36,6 +36,22 @@ export default function TopBar() {
   }, []);
 
   const [profileImage, setProfileImage] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [lang, setLang] = useState(localStorage.getItem('language') || 'EN');
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const notifications = [
+    { id: 1, text: "Focus streak: 3 days!", time: "2h ago" },
+    { id: 2, text: "New Java Quiz available", time: "4h ago" },
+    { id: 3, text: "Welcome to NeuroPath", time: "1d ago" }
+  ];
+
+  const handleLanguageToggle = () => {
+    const nextLang = lang === 'EN' ? 'KN' : 'EN';
+    setLang(nextLang);
+    localStorage.setItem('language', nextLang);
+    window.dispatchEvent(new Event('languageChange'));
+  };
 
   const handleNameSave = () => {
     const trimmedName = customName.trim();
@@ -52,13 +68,15 @@ export default function TopBar() {
   };
 
   return (
-    <header className="h-20 glass-panel border-b border-white/5 px-8 flex items-center justify-between z-20 sticky top-0">
+    <header className="h-20 glass-panel border-b border-white/5 px-8 flex items-center justify-between z-30 sticky top-0">
       <div className="flex items-center gap-4 flex-1">
         <div className="relative w-full max-w-md hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
           <input
             type="text"
-            placeholder="Search for subjects, study packs, or AI tutors..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={lang === 'KN' ? "ಹುಡುಕಿ..." : "Search for subjects, study packs..."}
             className="w-full bg-dark-surface/50 border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all placeholder:text-slate-500"
           />
         </div>
@@ -78,19 +96,42 @@ export default function TopBar() {
         {/* Offline Mode Indicator */}
         <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-xs font-medium">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          Online
+          {lang === 'KN' ? 'ಆನ್‌ಲೈನ್' : 'Online'}
         </div>
 
         {/* Multi-language Support */}
-        <button className="text-slate-400 hover:text-white transition-colors">
-          <Globe className="w-5 h-5" />
+        <button 
+          onClick={handleLanguageToggle}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-all"
+        >
+          <Globe className="w-4 h-4 text-neon-blue" />
+          <span className="text-xs font-bold">{lang}</span>
         </button>
 
         {/* Parent Notifications */}
-        <button className="relative text-slate-400 hover:text-white transition-colors">
-          <Bell className="w-5 h-5" />
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-dark-bg" />
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative text-slate-400 hover:text-white transition-colors p-2 rounded-xl hover:bg-white/5"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-dark-bg" />
+          </button>
+          
+          {showNotifications && (
+            <div className="absolute right-0 mt-3 w-72 glass-panel border border-white/10 rounded-2xl p-4 shadow-2xl z-50">
+              <h3 className="font-bold text-sm mb-3">Notifications</h3>
+              <div className="space-y-3">
+                {notifications.map(n => (
+                  <div key={n.id} className="p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer">
+                    <p className="text-xs text-white leading-tight">{n.text}</p>
+                    <p className="text-[10px] text-slate-500 mt-1">{n.time}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="h-8 w-px bg-white/10" />
 

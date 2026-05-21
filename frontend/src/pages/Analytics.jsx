@@ -20,7 +20,28 @@ const focusData = [
 
 export default function Analytics() {
   const [showRecoveryPlan, setShowRecoveryPlan] = useState(false);
+  const [liveFocus, setLiveFocus] = useState([
+    { time: '9am', focus: 80 },
+    { time: '10am', focus: 95 },
+    { time: '11am', focus: 60 },
+    { time: '12pm', focus: 40 },
+    { time: 'Now', focus: 75 },
+  ]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveFocus(prev => {
+        const newData = [...prev];
+        const now = newData[newData.length - 1];
+        // Simulate jitter/real-time focus monitoring
+        const jitter = Math.floor(Math.random() * 11) - 5; // -5 to +5
+        now.focus = Math.max(20, Math.min(100, now.focus + jitter));
+        return newData;
+      });
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   const recoverySteps = [
     'Review object-oriented principles and classes for 15 minutes.',
@@ -120,7 +141,7 @@ export default function Analytics() {
           
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={focusData}>
+              <BarChart data={liveFocus}>
                 <XAxis dataKey="time" stroke="#4b5563" tick={{fill: '#9ca3af'}} />
                 <Tooltip 
                   cursor={{fill: 'rgba(255,255,255,0.05)'}}
@@ -128,7 +149,7 @@ export default function Analytics() {
                 />
                 <Bar dataKey="focus" fill="var(--color-emerald-400)" radius={[4, 4, 0, 0]}>
                   {
-                    focusData.map((entry, index) => (
+                    liveFocus.map((entry, index) => (
                       <cell key={`cell-${index}`} fill={entry.focus < 50 ? '#ef4444' : '#34d399'} />
                     ))
                   }
