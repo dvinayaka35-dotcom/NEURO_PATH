@@ -222,21 +222,34 @@ export default function Dashboard() {
                 { title: 'Cloud Deployment', reason: 'Modern architecture trend' }
               ];
 
-              // Combine lagging subjects with default suggestions to always show 5
+              // Combine lagging subjects with default suggestions to always show exactly 5
               const items = [];
               lagging.forEach(s => items.push({ title: `Review ${s.title}`, reason: `Struggling with Level ${s.highestLevel + 1}`, status: 'lagging' }));
               
+              // Add continue subjects if not lagging
+              subjects.filter(s => s.status !== 'lagging').forEach(s => {
+                if (items.length < 5) {
+                  items.push({ title: `Continue ${s.title}`, reason: `Ready for Level ${s.highestLevel + 1}`, status: 'improving' });
+                }
+              });
+
               const remaining = 5 - items.length;
               if (remaining > 0) {
-                // Add default suggestions that aren't already in lagging
+                // Add default suggestions to fill up to 5
                 defaultSuggestions.slice(0, remaining).forEach(d => items.push(d));
               }
 
-              return items.map((rec, i) => (
+              return items.slice(0, 5).map((rec, i) => (
                 <div key={i} className={`p-4 rounded-xl border transition-colors cursor-pointer group ${
-                  rec.status === 'lagging' ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'
+                  rec.status === 'lagging' ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20' : 
+                  rec.status === 'improving' ? 'bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20' :
+                  'bg-white/5 border-white/5 hover:bg-white/10'
                 }`}>
-                  <h3 className={`font-semibold ${rec.status === 'lagging' ? 'text-red-400' : 'text-white group-hover:text-neon-blue'}`}>{rec.title}</h3>
+                  <h3 className={`font-semibold ${
+                    rec.status === 'lagging' ? 'text-red-400' : 
+                    rec.status === 'improving' ? 'text-emerald-400' :
+                    'text-white group-hover:text-neon-blue'
+                  }`}>{rec.title}</h3>
                   <p className="text-xs text-slate-400 mt-1">{rec.reason}</p>
                 </div>
               ));
@@ -246,7 +259,7 @@ export default function Dashboard() {
             onClick={() => navigate('/quiz')}
             className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-neon-purple text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
           >
-            AI Adaptive Quiz <ChevronRight className="w-4 h-4" />
+            Explore Q&A <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
