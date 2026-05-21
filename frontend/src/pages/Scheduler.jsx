@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CalendarDays, Plus, Clock, Trash2, CheckCircle2 } from 'lucide-react';
+import { CalendarDays, Plus, Clock, Trash2, CheckCircle2, AlertTriangle, Brain, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Scheduler() {
