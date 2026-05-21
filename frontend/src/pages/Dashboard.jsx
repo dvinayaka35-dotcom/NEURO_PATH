@@ -120,32 +120,83 @@ export default function Dashboard() {
       </div>
 
         {/* Main Chart - Always Visible */}
-        <div className="lg:col-span-2 glass-card p-6 rounded-2xl">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold">Real-time Performance</h2>
-            <select className="bg-dark-surface border border-white/10 rounded-lg px-3 py-1 text-sm outline-none">
-              <option>This Week</option>
-              <option>This Month</option>
-            </select>
+        <div className="lg:col-span-2 space-y-6">
+          <div className="glass-card p-6 rounded-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold">Real-time Performance</h2>
+              <div className="flex gap-2">
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-full font-bold uppercase tracking-wider">Live Tracking</span>
+              </div>
+            </div>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={performanceData}>
+                  <defs>
+                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-neon-purple)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--color-neon-purple)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="day" stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
+                  <YAxis stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                    itemStyle={{ color: '#fff' }}
+                  />
+                  <Area type="monotone" dataKey="score" stroke="var(--color-neon-purple)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={performanceData}>
-                <defs>
-                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-neon-purple)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="var(--color-neon-purple)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="day" stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
-                <YAxis stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                  itemStyle={{ color: '#fff' }}
-                />
-                <Area type="monotone" dataKey="score" stroke="var(--color-neon-purple)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-              </AreaChart>
-            </ResponsiveContainer>
+
+          {/* Student Academic Profile */}
+          <div className="glass-card p-6 rounded-2xl">
+            <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
+              <Target className="w-5 h-5 text-neon-blue" /> Student Academic Profile
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(() => {
+                const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
+                const defaultSubjects = [
+                  { id: 'java_programming', title: 'Java Programming' },
+                  { id: 'dynamic_websites', title: 'Dynamic Websites' },
+                  { id: 'software_engineering', title: 'Software Engineering' },
+                  { id: 'business_intelligence', title: 'Business Intelligence' }
+                ];
+
+                return defaultSubjects.map(sub => {
+                  const data = progress[sub.id] || { highestLevel: 0, status: 'neutral' };
+                  const level = data.highestLevel;
+                  const percentage = (level / 5) * 100;
+                  
+                  return (
+                    <div key={sub.id} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-sm font-bold">{sub.title}</h3>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded ${
+                          data.status === 'lagging' ? 'bg-red-500/20 text-red-400' : 
+                          level === 5 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-neon-blue/20 text-neon-blue'
+                        }`}>
+                          LEVEL {level}/5
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
+                        <div 
+                          className={`h-full transition-all duration-1000 ${
+                            data.status === 'lagging' ? 'bg-red-500' : 'bg-gradient-to-r from-neon-blue to-neon-purple'
+                          }`}
+                          style={{ width: `${Math.max(5, percentage)}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-slate-500">
+                        <span>{data.status === 'lagging' ? 'Needs Review' : 'Progressing'}</span>
+                        <span>{Math.round(percentage)}% Mastery</span>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
           </div>
         </div>
 
