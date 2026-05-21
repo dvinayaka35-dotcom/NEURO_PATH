@@ -2,67 +2,79 @@ import { useState, useEffect } from 'react';
 import { CalendarDays, Plus, Clock, Trash2, CheckCircle2, AlertTriangle, Brain, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Scheduler() {
     const [sessions, setSessions] = useState(() => {
         const saved = localStorage.getItem('studySessions');
         return saved ? JSON.parse(saved) : [];
     });
     const [isRecommending, setIsRecommending] = useState(false);
     const [missedAlert, setMissedAlert] = useState(null);
+    const [focusSession, setFocusSession] = useState(null);
 
     useEffect(() => {
         localStorage.setItem('studySessions', JSON.stringify(sessions));
         
-        // Check for missed sessions every minute
         const interval = setInterval(() => {
             const now = new Date();
             const currentTime = now.getHours() * 60 + now.getMinutes();
-
             sessions.forEach(s => {
                 if (!s.completed) {
                     const [timeStr, ampm] = s.time.split(' ');
                     let [hours, mins] = timeStr.split(':').map(Number);
                     if (ampm === 'PM' && hours !== 12) hours += 12;
                     if (ampm === 'AM' && hours === 12) hours = 0;
-                    
                     const sessionMinutes = hours * 60 + mins;
-                    // If session started more than 5 minutes ago and not completed
                     if (currentTime > (sessionMinutes + 5)) {
-                        setMissedAlert(`Attention! You missed your "${s.title}" session scheduled for ${s.time}.`);
+                        setMissedAlert(`Attention! You missed your "${s.title}" session.`);
                     }
                 }
             });
         }, 60000);
 
-        return () => clearInterval(interval);
-    }, [sessions]);
+        // Prevent exiting focus mode
+        const handleFullScreenChange = () => {
+            if (!document.fullscreenElement && focusSession) {
+                // User tried to exit! Re-prompt or re-enter
+                enterFullScreen();
+            }
+        };
+
+        document.addEventListener('fullscreenchange', handleFullScreenChange);
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('fullscreenchange', handleFullScreenChange);
+        };
+    }, [sessions, focusSession]);
+
+    const enterFullScreen = () => {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) elem.requestFullscreen();
+    };
+
+    const exitFullScreen = () => {
+        if (document.exitFullscreen) document.exitFullscreen();
+    };
+
+    const startFocusMode = (session) => {
+        setFocusSession(session);
+        enterFullScreen();
+    };
+
+    const endFocusMode = () => {
+        setSessions(prev => prev.map(s => s.id === focusSession.id ? { ...s, completed: true } : s));
+        setFocusSession(null);
+        exitFullScreen();
+    };
 
     const generateAITimetable = () => {
         setIsRecommending(true);
         setTimeout(() => {
             const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
             const subjects = Object.values(progress);
-            const lagging = subjects.filter(s => s.status === 'lagging');
-            const learning = subjects.filter(s => s.status !== 'lagging');
-            
-            const curriculum = [
-                { id: 'java_programming', title: 'Java Programming' },
-                { id: 'dynamic_websites', title: 'Dynamic Websites' },
-                { id: 'software_engineering', title: 'Software Engineering' },
-                { id: 'business_intelligence', title: 'Business Intelligence' }
-            ].filter(c => !subjects.find(s => s.id === c.id));
-
-            const allPossible = [...lagging, ...learning, ...curriculum];
-            
-            const times = [
-                { t: '09:00 AM', d: '90m' },
-                { t: '11:00 AM', d: '60m' },
-                { t: '02:00 PM', d: '90m' },
-                { t: '04:00 PM', d: '60m' }
-            ];
+            const times = [{ t: '09:00 AM', d: '90m' }, { t: '11:00 AM', d: '60m' }, { t: '02:00 PM', d: '90m' }, { t: '04:00 PM', d: '60m' }];
+            const allPossible = [...subjects, { title: 'Java Programming' }, { title: 'Dynamic Websites' }];
 
             const newSessions = times.map((slot, i) => {
-                const sub = allPossible[i % allPossible.length] || allPossible[0] || { title: 'General Revision' };
+                const sub = allPossible[i % allPossible.length] || allPossible[0];
                 return {
                     id: Date.now() + i,
                     title: sub.status === 'lagging' ? `RECOVERY: ${sub.title}` : `STUDY: ${sub.title}`,
@@ -72,34 +84,77 @@ export default function Scheduler() {
                     status: sub.status === 'lagging' ? 'critical' : 'normal'
                 };
             });
-
             setSessions(newSessions);
             setIsRecommending(false);
         }, 1000);
     };
 
     const addSession = () => {
-        const title = prompt("Enter Study Topic:", "Biology Revision");
+        const title = prompt("Enter Study Topic:");
         if (!title) return;
-        const newSession = { id: Date.now(), title, time: '04:00 PM', duration: '30m', completed: false };
-        setSessions([...sessions, newSession]);
+        setSessions([...sessions, { id: Date.now(), title, time: '04:00 PM', duration: '30m', completed: false }]);
     };
 
     const deleteSession = (id) => setSessions(sessions.filter(s => s.id !== id));
 
     const toggleComplete = (id) => {
         setSessions(sessions.map(s => s.id === id ? { ...s, completed: !s.completed } : s));
-        if (missedAlert) setMissedAlert(null);
+        setMissedAlert(null);
     };
+
+    if (focusSession) {
+        return (
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="fixed inset-0 z-[9999] bg-[#020617] flex flex-col items-center justify-center p-8 overflow-hidden"
+            >
+                <div className="absolute inset-0 bg-gradient-to-b from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
+                <div className="max-w-2xl w-full text-center space-y-12 relative z-10">
+                    <div className="space-y-4">
+                        <div className="w-20 h-20 rounded-full bg-neon-blue/10 flex items-center justify-center mx-auto shadow-[0_0_50px_rgba(0,240,255,0.2)]">
+                            <Brain className="w-10 h-10 text-neon-blue animate-pulse" />
+                        </div>
+                        <h1 className="text-4xl font-black tracking-tighter text-white uppercase">Deep Focus Mode</h1>
+                        <p className="text-slate-500 font-bold tracking-widest text-xs uppercase">Current Session: {focusSession.title}</p>
+                    </div>
+
+                    <div className="relative py-12">
+                        <div className="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20">
+                            {focusSession.duration}
+                        </div>
+                        <p className="text-slate-400 mt-4 text-sm font-medium">Session ends in {focusSession.duration}. No exits allowed.</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-6">
+                        {['NO DISTRACTIONS', 'NO SOCIAL MEDIA', 'FULL RETENTION'].map(tip => (
+                            <div key={tip} className="p-4 rounded-2xl bg-white/5 border border-white/10 text-[10px] font-black text-slate-400 tracking-widest">
+                                {tip}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="pt-12">
+                        <button 
+                            onClick={endFocusMode}
+                            className="px-12 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black uppercase tracking-widest shadow-xl shadow-emerald-500/20 hover:scale-105 transition-all"
+                        >
+                            Finish & Mark Complete
+                        </button>
+                    </div>
+                </div>
+
+                <div className="absolute bottom-8 text-[10px] text-slate-700 font-black tracking-[0.5em] uppercase">
+                    NeuroPath Focus Shield Active
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <div className="space-y-6">
             {missedAlert && (
-                <motion.div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    className="p-4 bg-red-500 rounded-2xl flex items-center justify-between text-white shadow-lg shadow-red-500/20"
-                >
+                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="p-4 bg-red-500 rounded-2xl flex items-center justify-between text-white shadow-lg">
                     <div className="flex items-center gap-3">
                         <AlertTriangle className="w-5 h-5" />
                         <p className="text-sm font-bold">{missedAlert}</p>
@@ -117,7 +172,7 @@ export default function Scheduler() {
                     <button 
                         onClick={generateAITimetable}
                         disabled={isRecommending}
-                        className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-neon-blue font-bold hover:bg-white/10 transition-all disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-neon-blue font-bold hover:bg-white/10 transition-all disabled:opacity-50 shadow-inner"
                     >
                         <Brain className="w-5 h-5" /> {isRecommending ? 'Generating...' : 'AI Timetable'}
                     </button>
@@ -140,20 +195,18 @@ export default function Scheduler() {
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.9 }}
-                                className={`glass-card p-5 rounded-3xl border flex items-center justify-between group transition-all ${
+                                className={`glass-card p-5 rounded-3xl border flex items-center justify-between group transition-all cursor-pointer ${
                                     session.status === 'critical' ? 'border-red-500/50 bg-red-500/10' :
-                                    session.completed ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10 hover:border-white/20'
+                                    session.completed ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10 hover:border-neon-blue/30 hover:bg-neon-blue/5'
                                 }`}
+                                onClick={() => !session.completed && startFocusMode(session)}
                             >
                                 <div className="flex items-center gap-4">
-                                    <button 
-                                        onClick={() => toggleComplete(session.id)}
-                                        className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
-                                            session.completed ? 'bg-emerald-500 text-white' : 'bg-white/5 text-slate-500 hover:bg-white/10'
-                                        }`}
-                                    >
+                                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                                        session.completed ? 'bg-emerald-500 text-white' : 'bg-white/5 text-slate-500 group-hover:bg-neon-blue group-hover:text-white'
+                                    }`}>
                                         <CheckCircle2 className="w-6 h-6" />
-                                    </button>
+                                    </div>
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h3 className={`font-bold transition-all ${session.completed ? 'text-slate-500 line-through' : 'text-white'}`}>
@@ -172,9 +225,17 @@ export default function Scheduler() {
                                         </div>
                                     </div>
                                 </div>
-                                <button onClick={() => deleteSession(session.id)} className="opacity-0 group-hover:opacity-100 p-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all">
-                                    <Trash2 className="w-5 h-5" />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    {!session.completed && (
+                                        <span className="opacity-0 group-hover:opacity-100 text-[10px] font-black text-neon-blue uppercase tracking-widest mr-4">Enter Focus Mode</span>
+                                    )}
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}
+                                        className="opacity-0 group-hover:opacity-100 p-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </motion.div>
                         ))}
                     </AnimatePresence>
@@ -188,18 +249,16 @@ export default function Scheduler() {
                 </div>
 
                 <div className="space-y-6">
-                    <div className="glass-card p-6 rounded-3xl border border-white/10">
-                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <div className="glass-card p-8 rounded-3xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent">
+                        <h2 className="text-xl font-black mb-4 flex items-center gap-2 uppercase tracking-tighter">
                             <Target className="w-5 h-5 text-neon-blue" /> Adaptive Sync
                         </h2>
-                        <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                            The scheduler is actively monitoring your <b>AI Adaptive Quiz</b> performance. Lagging subjects are automatically injected into high-focus morning slots.
+                        <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
+                            Our neuro-engine balances your cognitive load. <b>Lagging subjects</b> are locked into high-intensity slots.
                         </p>
-                        <div className="space-y-4">
-                            <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                                <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Target Intensity</p>
-                                <p className="text-xl font-bold text-white">Dynamic AI Mode</p>
-                            </div>
+                        <div className="p-4 bg-neon-blue/5 rounded-2xl border border-neon-blue/10">
+                            <p className="text-[10px] text-neon-blue uppercase font-black tracking-widest mb-1">Focus Shield Status</p>
+                            <p className="text-xl font-bold text-white uppercase tracking-tighter">Ready for Lock</p>
                         </div>
                     </div>
                 </div>
