@@ -119,54 +119,35 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart or Placeholder */}
-        {hasProgress ? (
-          <div className="lg:col-span-2 glass-card p-6 rounded-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold">Real-time Performance</h2>
-              <select className="bg-dark-surface border border-white/10 rounded-lg px-3 py-1 text-sm outline-none">
-                <option>This Week</option>
-                <option>This Month</option>
-              </select>
-            </div>
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={performanceData}>
-                  <defs>
-                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--color-neon-purple)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="var(--color-neon-purple)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
-                  <YAxis stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                    itemStyle={{ color: '#fff' }}
-                  />
-                  <Area type="monotone" dataKey="score" stroke="var(--color-neon-purple)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+        {/* Main Chart - Always Visible */}
+        <div className="lg:col-span-2 glass-card p-6 rounded-2xl">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold">Real-time Performance</h2>
+            <select className="bg-dark-surface border border-white/10 rounded-lg px-3 py-1 text-sm outline-none">
+              <option>This Week</option>
+              <option>This Month</option>
+            </select>
           </div>
-        ) : (
-          <div className="lg:col-span-2 glass-card p-6 rounded-2xl border border-dashed border-slate-600 flex flex-col items-center justify-center h-80">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-neon-purple/10 flex items-center justify-center mx-auto mb-4">
-                <Target className="w-8 h-8 text-neon-purple" />
-              </div>
-              <h3 className="text-lg font-semibold text-white mb-2">No Progress Yet</h3>
-              <p className="text-slate-400 mb-6">Start learning to track your performance and see your progress graph grow!</p>
-              <button
-                onClick={() => navigate('/quiz')}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-neon-purple to-neon-blue text-white font-semibold hover:opacity-90 transition-opacity"
-              >
-                Start Your First Quiz
-              </button>
-            </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={performanceData}>
+                <defs>
+                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-neon-purple)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--color-neon-purple)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="day" stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
+                <YAxis stroke="#4b5563" tick={{ fill: '#9ca3af' }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                  itemStyle={{ color: '#fff' }}
+                />
+                <Area type="monotone" dataKey="score" stroke="var(--color-neon-purple)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-        )}
+        </div>
 
         {/* AI Recommendations */}
         <div className="glass-card p-6 rounded-2xl flex flex-col">
@@ -213,7 +194,7 @@ export default function Dashboard() {
             onClick={() => navigate('/quiz')}
             className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-neon-purple text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
           >
-            Explore Q&A <ChevronRight className="w-4 h-4" />
+            AI Adaptive Quiz <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
