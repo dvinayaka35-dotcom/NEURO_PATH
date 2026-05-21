@@ -11,6 +11,39 @@ export default function Dashboard() {
   const [sessionTime, setSessionTime] = useState(0);
   const navigate = useNavigate();
 
+  const [recMode, setRecMode] = useState('projects'); // projects or qa
+
+  const subjectProjects = {
+    java_programming: [
+      { title: 'AI-Powered Smart ATM', reason: 'Java OOP + AI Integration' },
+      { title: 'Secure Blockchain Ledger', reason: 'Advanced Data Structures' },
+      { title: 'Predictive Inventory System', reason: 'File I/O + Analytics' },
+      { title: 'Multithreaded Chat Server', reason: 'Networking & Concurrency' },
+      { title: 'Biometric Attendance App', reason: 'Java Swing + External APIs' }
+    ],
+    dynamic_websites: [
+      { title: 'NeuroPath Learning Hub', reason: 'Full-stack React/Node.js' },
+      { title: 'Eco-Track Dashboard', reason: 'D3.js Visualization' },
+      { title: 'P2P Marketplace Platform', reason: 'Real-time WebSockets' },
+      { title: 'AR Portfolio Gallery', reason: 'Web Graphics & Responsive Design' },
+      { title: 'Serverless SaaS Starter', reason: 'Cloud Functions & NoSQL' }
+    ],
+    software_engineering: [
+      { title: 'Automated Test Suite Engine', reason: 'QA & Unit Testing' },
+      { title: 'Agile Kanban Visualizer', reason: 'SDLC Workflow Management' },
+      { title: 'Vulnerability Scanner', reason: 'Security Engineering' },
+      { title: 'CI/CD Pipeline Manager', reason: 'DevOps Automation' },
+      { title: 'Bug Lifecycle Analytics', reason: 'Defect Management' }
+    ],
+    business_intelligence: [
+      { title: 'Real-time Sales Forecaster', reason: 'OLAP Cube Processing' },
+      { title: 'Social Media Sentiment AI', reason: 'Data Extraction & NLP' },
+      { title: 'Supply Chain ETL Pipeline', reason: 'Data Warehousing' },
+      { title: 'Financial Health Monitor', reason: 'KPI Visualization' },
+      { title: 'Customer Churn Predictor', reason: 'Predictive Modeling' }
+    ]
+  };
+
   const translations = {
     EN: {
       welcome: "Welcome back",
@@ -201,52 +234,66 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* AI Recommendations */}
+        {/* AI Recommendations & Innovations */}
         <div className="glass-card p-6 rounded-2xl flex flex-col">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <SparklesIcon /> AI Recommendations
-          </h2>
+          <div className="flex flex-col gap-4 mb-6">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Brain className="w-5 h-5 text-neon-blue" /> Smart Suggestions
+            </h2>
+            <div className="flex p-1 bg-white/5 rounded-xl border border-white/10">
+              <button 
+                onClick={() => setRecMode('projects')}
+                className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${recMode === 'projects' ? 'bg-neon-blue text-white shadow-[0_0_10px_rgba(0,240,255,0.3)]' : 'text-slate-500 hover:text-white'}`}
+              >
+                PROJECT IDEAS
+              </button>
+              <button 
+                onClick={() => setRecMode('qa')}
+                className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${recMode === 'qa' ? 'bg-neon-purple text-white shadow-[0_0_10px_rgba(176,38,255,0.3)]' : 'text-slate-500 hover:text-white'}`}
+              >
+                PRACTICE Q&A
+              </button>
+            </div>
+          </div>
+
           <div className="flex-1 space-y-4">
             {(() => {
               const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
               const subjects = Object.values(progress);
-              const lagging = subjects.filter(s => s.status === 'lagging');
+              const targetSubject = subjects.find(s => s.status === 'lagging') || subjects[0] || { id: 'java_programming' };
               
-              const defaultSuggestions = [
-                { title: 'Data Structures Practice', reason: 'Common interview topic' },
-                { title: 'Mobile UI Optimization', reason: 'Next module in Dynamic Websites' },
-                { title: 'SQL Query Optimization', reason: 'Based on your Database interest' },
-                { title: 'Agile Workflow Simulation', reason: 'Practical Software Engineering' },
-                { title: 'Java Stream API', reason: 'Advanced programming concept' },
-                { title: 'Cybersecurity Basics', reason: 'Critical for web developers' },
-                { title: 'Cloud Deployment', reason: 'Modern architecture trend' }
-              ];
-
-              // Combine lagging subjects with default suggestions to always show 5
-              const items = [];
-              lagging.forEach(s => items.push({ title: `Review ${s.title}`, reason: `Struggling with Level ${s.highestLevel + 1}`, status: 'lagging' }));
-              
-              const remaining = 5 - items.length;
-              if (remaining > 0) {
-                // Add default suggestions that aren't already in lagging
-                defaultSuggestions.slice(0, remaining).forEach(d => items.push(d));
+              if (recMode === 'projects') {
+                const projects = subjectProjects[targetSubject.id] || subjectProjects.java_programming;
+                return projects.map((proj, i) => (
+                  <div key={i} className="p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+                    <h3 className="font-semibold text-white group-hover:text-neon-blue transition-colors text-sm">{proj.title}</h3>
+                    <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">{proj.reason}</p>
+                  </div>
+                ));
               }
 
-              return items.map((rec, i) => (
-                <div key={i} className={`p-4 rounded-xl border transition-colors cursor-pointer group ${
-                  rec.status === 'lagging' ? 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'
-                }`}>
-                  <h3 className={`font-semibold ${rec.status === 'lagging' ? 'text-red-400' : 'text-white group-hover:text-neon-blue'}`}>{rec.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1">{rec.reason}</p>
+              // Q&A Mode
+              const defaultQA = [
+                { title: 'Core Syntax Mastery', reason: 'Basic level concepts' },
+                { title: 'Algorithm Efficiency', reason: 'Optimizing performance' },
+                { title: 'System Architecture', reason: 'Structural design patterns' },
+                { title: 'Error Mitigation', reason: 'Robust exception handling' },
+                { title: 'API Integration', reason: 'Connecting external services' }
+              ];
+              return defaultQA.map((qa, i) => (
+                <div key={i} className="p-4 rounded-xl border border-neon-purple/20 bg-neon-purple/5 hover:bg-neon-purple/10 transition-colors cursor-pointer group">
+                  <h3 className="font-semibold text-neon-purple text-sm">{qa.title}</h3>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">{qa.reason}</p>
                 </div>
               ));
             })()}
           </div>
+
           <button
             onClick={() => navigate('/quiz')}
-            className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-neon-purple text-white font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+            className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-neon-blue to-neon-purple text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all hover:scale-[1.02] shadow-lg"
           >
-            AI Adaptive Quiz <ChevronRight className="w-4 h-4" />
+            Start Smart Study <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
