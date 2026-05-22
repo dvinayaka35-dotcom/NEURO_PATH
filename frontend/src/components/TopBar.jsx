@@ -66,6 +66,23 @@ export default function TopBar() {
       handleNameSave();
     }
   };
+  const searchableItems = [
+    { title: 'Dashboard', path: '/', description: 'Overview of your progress' },
+    { title: 'Smart Scheduler', path: '/scheduler', description: 'AI-powered study routine' },
+    { title: 'Adaptive Quiz', path: '/quiz', description: 'Test your knowledge' },
+    { title: 'Analytics', path: '/analytics', description: 'Detailed performance insights' },
+    { title: 'Chat', path: '/chat', description: 'Ask the AI Assistant' },
+    { title: 'Study Packs', path: '/study-packs', description: 'Curated learning materials' },
+    { title: 'Profile', path: '/profile', description: 'View your account' },
+    { title: 'Settings', path: '/settings', description: 'System preferences' }
+  ];
+
+  const filteredResults = searchQuery.trim() === '' 
+    ? [] 
+    : searchableItems.filter(item => 
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
   return (
     <header className="h-20 glass-panel border-b border-white/5 px-8 flex items-center justify-between z-30 sticky top-0">
@@ -79,6 +96,28 @@ export default function TopBar() {
             placeholder={lang === 'KN' ? "ಹುಡುಕಿ..." : "Search for subjects, study packs..."}
             className="w-full bg-dark-surface/50 border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all placeholder:text-slate-500"
           />
+          
+          {/* Search Results Dropdown */}
+          {filteredResults.length > 0 && (
+            <div className="absolute top-full left-0 mt-2 w-full glass-panel border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50">
+              {filteredResults.map((result, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    navigate(result.path);
+                    setSearchQuery('');
+                  }}
+                  className="w-full p-4 text-left hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors flex items-center justify-between group"
+                >
+                  <div>
+                    <p className="font-bold text-sm text-white group-hover:text-neon-blue transition-colors">{result.title}</p>
+                    <p className="text-[10px] text-slate-500">{result.description}</p>
+                  </div>
+                  <Search className="w-4 h-4 text-slate-700 group-hover:text-neon-blue opacity-0 group-hover:opacity-100 transition-all" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
