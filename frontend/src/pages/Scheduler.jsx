@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CalendarDays, Plus, Clock, Trash2, CheckCircle2, AlertTriangle, Brain, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+export default function Scheduler() {
     const [sessions, setSessions] = useState(() => {
         const saved = localStorage.getItem('studySessions');
         return saved ? JSON.parse(saved) : [];
