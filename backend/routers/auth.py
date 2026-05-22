@@ -28,6 +28,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
     parent_phone: Optional[str] = None
+    is_verified: Optional[bool] = False
 
 class UserLogin(BaseModel):
     email: str
@@ -77,8 +78,8 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
     new_user = User(
         email=user.email,
         password_hash=hashed_password,
-        is_verified=False,
-        verification_code=verification_code,
+        is_verified=user.is_verified, # Use the verification status from the request
+        verification_code=None if user.is_verified else verification_code,
         parent_phone=user.parent_phone
     )
     session.add(new_user)

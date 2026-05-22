@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -22,15 +23,28 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const navigate = useNavigate();
+    const [isFocusMode, setIsFocusMode] = useState(false);
 
-  const handleLogout = () => {
+    useEffect(() => {
+        const handleFocusMode = (e) => {
+            setIsFocusMode(e.detail);
+        };
+        window.addEventListener('focusModeToggle', handleFocusMode);
+        return () => window.removeEventListener('focusModeToggle', handleFocusMode);
+    }, []);
+
+    const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('email');
     localStorage.removeItem('verified');
     localStorage.removeItem('customName');
+    localStorage.removeItem('totalStudyTime'); // Stop and clear timer on logout
+    localStorage.removeItem('focusScore'); // Clear focus score on logout
+    localStorage.removeItem('neuroPathProgress'); // Clear subject progress on logout
     navigate('/login', { replace: true });
   };
+
+  if (isFocusMode) return null;
 
   return (
     <div className="w-64 h-full glass-panel border-r border-white/5 flex flex-col z-20">

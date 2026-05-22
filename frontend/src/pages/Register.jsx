@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle, Phone } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '../api';
+import { auth, RecaptchaVerifier, signInWithPhoneNumber } from '../firebase';
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ export default function Register() {
     const [success, setSuccess] = useState('');
     const [step, setStep] = useState('register'); // 'register' or 'verify'
     const [verificationCode, setVerificationCode] = useState('');
+    const [confirmationResult, setConfirmationResult] = useState(null);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -25,6 +27,17 @@ export default function Register() {
             ...formData,
             [e.target.name]: e.target.value
         });
+    };
+
+    const setupRecaptcha = () => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'invisible',
+                'callback': (response) => {
+                    // reCAPTCHA solved, allow signInWithPhoneNumber.
+                }
+            });
+        }
     };
 
     const handleRegister = async (e) => {
@@ -37,25 +50,26 @@ export default function Register() {
         setError('');
 
         try {
-            const response = await api.post('/auth/register', {
-                email: formData.email,
-                password: formData.password,
-                parent_phone: formData.parentPhone
-            });
-            const verificationCodeFromServer = response.data?.verification_code;
-            localStorage.setItem('email', formData.email);
-            localStorage.setItem('joinedDate', new Date().toLocaleDateString());
-            localStorage.setItem('verified', 'false');
+            setupRecaptcha();
+            const appVerifier = window.recaptchaVerifier;
+            
+            // Format phone number if needed (Firebase requires + prefix)
+            const phoneNumber = formData.parentPhone.startsWith('+') 
+                ? formData.parentPhone 
+                : `+91${formData.parentPhone}`; // Defaulting to India if no prefix
 
-            if (verificationCodeFromServer) {
-                setVerificationCode(verificationCodeFromServer);
-                setSuccess(`Registration successful! Your verification code is ${verificationCodeFromServer}`);
-            } else {
-                setSuccess('Registration successful! Check console for verification code.');
-            }
+            const confirmation = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+            setConfirmationResult(confirmation);
+            
+            setSuccess('OTP sent to ' + phoneNumber);
             setStep('verify');
         } catch (err) {
-            setError(err.response?.data?.detail || 'Registration failed');
+            console.error(err);
+            setError(err.message || 'Failed to send OTP. Check your phone number format.');
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear();
+                window.recaptchaVerifier = null;
+            }
         } finally {
             setLoading(false);
         }
@@ -67,15 +81,22 @@ export default function Register() {
         setError('');
 
         try {
-            await api.post('/auth/verify', {
+            await confirmationResult.confirm(verificationCode);
+            
+            // Now that phone is verified by Firebase, tell our backend to create the user
+            await api.post('/auth/register', {
                 email: formData.email,
-                code: verificationCode
+                password: formData.password,
+                parent_phone: formData.parentPhone,
+                is_verified: true // Tell backend it's already verified via Firebase
             });
+
+            localStorage.setItem('email', formData.email);
             localStorage.setItem('verified', 'true');
-            setSuccess('Email verified! You can now log in.');
+            setSuccess('Verification successful! Creating your account...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            setError(err.response?.data?.detail || 'Verification failed');
+            setError('Invalid OTP code. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -212,6 +233,8 @@ export default function Register() {
                             </motion.div>
                         )}
 
+                        <div id="recaptcha-container"></div>
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -221,7 +244,7 @@ export default function Register() {
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    Create Account
+                                    Send OTP
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}

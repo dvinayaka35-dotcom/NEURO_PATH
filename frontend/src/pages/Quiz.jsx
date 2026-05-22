@@ -144,6 +144,23 @@ export default function Quiz() {
     const [isStudyComplete, setIsStudyComplete] = useState(false);
     const [realContent, setRealContent] = useState("");
 
+    // Auto-select topic if redirected from Scheduler
+    useEffect(() => {
+        const scheduledTopic = localStorage.getItem('scheduledTopic');
+        if (scheduledTopic) {
+            const subjectId = Object.keys(SUBJECTS).find(key => 
+                SUBJECTS[key].title.toLowerCase().includes(scheduledTopic.toLowerCase()) ||
+                scheduledTopic.toLowerCase().includes(SUBJECTS[key].title.toLowerCase())
+            );
+            
+            if (subjectId) {
+                setSelectedSubject(SUBJECTS[subjectId]);
+                setView('study'); // Go directly to study/module view
+            }
+            localStorage.removeItem('scheduledTopic');
+        }
+    }, []);
+
     // Study Timer Logic
     useEffect(() => {
         let interval;

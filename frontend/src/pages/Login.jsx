@@ -31,6 +31,9 @@ export default function Login() {
             localStorage.setItem('token', response.data.access_token);
             localStorage.setItem('email', formData.email);
             localStorage.setItem('verified', 'true');
+            localStorage.setItem('totalStudyTime', '0'); // Reset timer on login
+            localStorage.setItem('focusScore', '0'); // Reset focus score on login
+            localStorage.setItem('neuroPathProgress', '{}'); // Reset progress on login
             navigate('/');
         } catch (err) {
             setError(err.response?.data?.detail || 'Login failed');

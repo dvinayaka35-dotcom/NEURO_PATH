@@ -1,18 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flame, Target, Brain, Clock, ChevronRight } from 'lucide-react';
+import { Flame, Target, Brain, Clock, ChevronRight, CheckCircle2, Sparkles, Trophy } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Dashboard() {
   const [displayName, setDisplayName] = useState('Learner');
   const [performanceData, setPerformanceData] = useState([]);
   const [hasProgress, setHasProgress] = useState(false);
   const [lang, setLang] = useState(localStorage.getItem('language') || 'EN');
-  const [sessionTime, setSessionTime] = useState(0);
+  const [sessionTime, setSessionTime] = useState(parseInt(localStorage.getItem('totalStudyTime') || '0'));
   const navigate = useNavigate();
 
   const [recMode, setRecMode] = useState('projects'); // projects or qa
   const [selectedProject, setSelectedProject] = useState(null);
+  const [xp, setXp] = useState(parseInt(localStorage.getItem('xp') || '0'));
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [subjectProgress, setSubjectProgress] = useState(JSON.parse(localStorage.getItem('neuroPathProgress') || '{}'));
+
+  const [missions, setMissions] = useState([
+    { id: 1, title: 'Complete a Smart Quiz', xp: 150, completed: false, icon: Brain },
+    { id: 2, title: '30 Min Deep Work', xp: 100, completed: false, icon: Clock },
+    { id: 3, title: 'Review 5 Mistakes', xp: 200, completed: false, icon: Target },
+    { id: 4, title: 'Connect with a Mentor', xp: 300, completed: false, icon: Sparkles },
+  ]);
 
   const subjectProjects = {
     java_programming: [
@@ -147,14 +159,34 @@ export default function Dashboard() {
     const handleLangChange = () => setLang(localStorage.getItem('language') || 'EN');
     window.addEventListener('languageChange', handleLangChange);
 
+    const handleProfileUpdate = () => {
+      const newXp = parseInt(localStorage.getItem('xp') || '0');
+      if (newXp > xp) {
+        setXp(newXp);
+        // Auto-complete "Complete a Smart Quiz" mission if XP increased
+        setMissions(prev => prev.map(m => 
+          m.id === 1 && !m.completed ? { ...m, completed: true } : m
+        ));
+        
+        setNotifications(prev => [...prev, { id: Date.now(), text: `Mission Progress!`, type: 'info' }]);
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+      }
+      // Re-load subject progress whenever any update happens
+      setSubjectProgress(JSON.parse(localStorage.getItem('neuroPathProgress') || '{}'));
+    };
+    window.addEventListener('profileUpdate', handleProfileUpdate);
+    window.addEventListener('storage', handleProfileUpdate); // Sync across tabs
+
     // Live timer & Live Chart update
     const interval = setInterval(() => {
-      setSessionTime(prev => prev + 1);
+      const currentTime = parseInt(localStorage.getItem('totalStudyTime') || '0');
+      setSessionTime(currentTime);
       setPerformanceData(prev => {
         const newData = [...prev];
         const last = newData[newData.length - 1];
         // Simulate lively graph movement (focus score increases with study time)
-        last.score = Math.min(100, 50 + Math.floor(xp / 10) + Math.floor(sessionTime / 60));
+        last.score = Math.min(100, 50 + Math.floor(xp / 10) + Math.floor(currentTime / 60));
         return newData;
       });
     }, 1000);
@@ -186,9 +218,31 @@ export default function Dashboard() {
 
     return () => {
       window.removeEventListener('languageChange', handleLangChange);
+      window.removeEventListener('profileUpdate', handleProfileUpdate);
+      window.removeEventListener('storage', handleProfileUpdate);
       clearInterval(interval);
     };
-  }, []);
+  }, [xp]);
+
+  const completeMission = (id, reward) => {
+    setMissions(prev => prev.map(m => m.id === id ? { ...m, completed: true } : m));
+    const newXp = xp + reward;
+    setXp(newXp);
+    localStorage.setItem('xp', newXp.toString());
+    
+    // Add notification
+    const notificationId = Date.now();
+    setNotifications(prev => [...prev, { id: notificationId, text: `+${reward} XP`, type: 'xp' }]);
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+    }, 2000);
+
+    // Show confetti for big rewards
+    if (reward >= 150) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
+    }
+  };
 
   const formatSessionTime = (s) => {
     const mins = Math.floor(s / 60);
@@ -219,19 +273,77 @@ export default function Dashboard() {
           { icon: Target, label: t.stats[0], value: '78/100', color: 'text-neon-blue', bg: 'bg-neon-blue/10' },
           { icon: Brain, label: t.stats[1], value: 'High', color: 'text-neon-purple', bg: 'bg-neon-purple/10' },
           { icon: Clock, label: t.stats[2], value: formatSessionTime(sessionTime), color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-          { icon: Flame, label: t.stats[3], value: localStorage.getItem('xp') || '0', color: 'text-orange-400', bg: 'bg-orange-400/10' },
+          { icon: Flame, label: t.stats[3], value: xp, color: 'text-orange-400', bg: 'bg-orange-400/10' },
         ].map((stat, i) => (
-          <div key={i} className="glass-card p-5 rounded-2xl flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg}`}>
+          <motion.div 
+            key={i} 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="glass-card p-5 rounded-2xl flex items-center gap-4 relative overflow-hidden group"
+          >
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg} group-hover:scale-110 transition-transform`}>
               <stat.icon className={`w-6 h-6 ${stat.color}`} />
             </div>
             <div>
               <p className="text-sm text-slate-400">{stat.label}</p>
-              <p className="text-xl font-bold">{stat.value}</p>
+              <motion.p 
+                key={stat.value}
+                initial={{ scale: 1.2, color: '#fff' }}
+                animate={{ scale: 1, color: '#fff' }}
+                className="text-xl font-bold"
+              >
+                {stat.value}
+              </motion.p>
             </div>
-          </div>
+            <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rotate-45 translate-x-8 -translate-y-8 group-hover:bg-white/10 transition-colors" />
+          </motion.div>
         ))}
       </div>
+
+      {/* Floating XP Notifications */}
+      <div className="fixed bottom-10 right-10 z-50 pointer-events-none">
+        <AnimatePresence>
+          {notifications.map(n => (
+            <motion.div
+              key={n.id}
+              initial={{ opacity: 0, y: 20, scale: 0.5 }}
+              animate={{ opacity: 1, y: -100, scale: 1.2 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="bg-orange-500 text-white px-4 py-2 rounded-full font-black shadow-[0_0_20px_rgba(249,115,22,0.5)] mb-2"
+            >
+              {n.text}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Confetti Overlay */}
+      <AnimatePresence>
+        {showConfetti && (
+          <div className="fixed inset-0 pointer-events-none z-[100] flex items-center justify-center">
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ 
+                  x: 0, 
+                  y: 0, 
+                  rotate: 0,
+                  opacity: 1 
+                }}
+                animate={{ 
+                  x: (Math.random() - 0.5) * 1000, 
+                  y: (Math.random() - 0.5) * 1000, 
+                  rotate: Math.random() * 360,
+                  opacity: 0 
+                }}
+                transition={{ duration: 2, ease: "easeOut" }}
+                className={`absolute w-4 h-4 ${['bg-neon-blue', 'bg-neon-purple', 'bg-orange-400', 'bg-emerald-400'][i % 4]} rounded-sm`}
+              />
+            ))}
+          </div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chart - Always Visible */}
@@ -258,20 +370,32 @@ export default function Dashboard() {
                     contentStyle={{ backgroundColor: '#111827', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
                     itemStyle={{ color: '#fff' }}
                   />
-                  <Area type="monotone" dataKey="score" stroke="var(--color-neon-purple)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                  <Area 
+                    type="monotone" 
+                    dataKey="score" 
+                    stroke="var(--color-neon-purple)" 
+                    strokeWidth={3} 
+                    fillOpacity={1} 
+                    fill="url(#colorScore)" 
+                    animationDuration={2000}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
+            </div>
+            <div className="mt-4 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-neon-purple animate-pulse" /> Cognitive Load</span>
+              <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-neon-blue animate-pulse" /> Focus Retention</span>
             </div>
           </div>
 
           {/* Student Academic Profile */}
-          <div className="glass-card p-6 rounded-2xl">
+          <div className="glass-card p-6 rounded-2xl relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-neon-blue/5 rounded-full blur-3xl" />
             <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-              <Target className="w-5 h-5 text-neon-blue" /> Student Academic Profile
+              <Trophy className="w-5 h-5 text-neon-blue" /> Mastery & Progress
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {(() => {
-                const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
                 const defaultSubjects = [
                   { id: 'java_programming', title: 'Java Programming' },
                   { id: 'dynamic_websites', title: 'Dynamic Websites' },
@@ -280,15 +404,19 @@ export default function Dashboard() {
                 ];
 
                 return defaultSubjects.map(sub => {
-                  const data = progress[sub.id] || { highestLevel: 0, status: 'neutral' };
+                  const data = subjectProgress[sub.id] || { highestLevel: 0, status: 'neutral' };
                   const level = data.highestLevel;
                   const percentage = (level / 5) * 100;
                   
                   return (
-                    <div key={sub.id} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all">
+                    <motion.div 
+                      key={sub.id} 
+                      whileHover={{ scale: 1.02 }}
+                      className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-neon-blue/30 transition-all cursor-default"
+                    >
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-sm font-bold">{sub.title}</h3>
-                        <span className={`text-[10px] font-black px-2 py-0.5 rounded ${
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded shadow-sm ${
                           data.status === 'lagging' ? 'bg-red-500/20 text-red-400' : 
                           level === 5 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-neon-blue/20 text-neon-blue'
                         }`}>
@@ -296,18 +424,22 @@ export default function Dashboard() {
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-2">
-                        <div 
-                          className={`h-full transition-all duration-1000 ${
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.max(5, percentage)}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          className={`h-full relative ${
                             data.status === 'lagging' ? 'bg-red-500' : 'bg-gradient-to-r from-neon-blue to-neon-purple'
                           }`}
-                          style={{ width: `${Math.max(5, percentage)}%` }}
-                        />
+                        >
+                          <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" />
+                        </motion.div>
                       </div>
                       <div className="flex justify-between text-[10px] text-slate-500">
                         <span>{data.status === 'lagging' ? 'Needs Review' : 'Progressing'}</span>
                         <span>{Math.round(percentage)}% Mastery</span>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 });
               })()}
@@ -316,7 +448,47 @@ export default function Dashboard() {
         </div>
 
         {/* AI Recommendations & Innovations */}
-        <div className="glass-card p-6 rounded-2xl flex flex-col min-h-[500px]">
+        <div className="flex flex-col gap-6">
+          {/* Daily Missions - NEW LIVELY SECTION */}
+          <div className="glass-card p-6 rounded-2xl border-orange-500/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-2 opacity-10">
+              <Sparkles className="w-12 h-12 text-orange-400" />
+            </div>
+            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Flame className="w-5 h-5 text-orange-400" /> Daily Quests
+            </h2>
+            <div className="space-y-3">
+              {missions.map((mission) => (
+                <motion.div
+                  key={mission.id}
+                  layout
+                  className={`p-3 rounded-xl border flex items-center justify-between group cursor-pointer transition-all ${
+                    mission.completed 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 opacity-60' 
+                    : 'bg-white/5 border-white/10 hover:border-orange-500/40 hover:bg-white/10'
+                  }`}
+                  onClick={() => !mission.completed && completeMission(mission.id, mission.xp)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${mission.completed ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
+                      {mission.completed ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <mission.icon className="w-4 h-4 text-slate-400" />}
+                    </div>
+                    <div>
+                      <h3 className={`text-xs font-bold ${mission.completed ? 'line-through text-slate-500' : 'text-white'}`}>{mission.title}</h3>
+                      <p className="text-[10px] text-orange-400 font-bold">+{mission.xp} XP</p>
+                    </div>
+                  </div>
+                  {!mission.completed && (
+                    <div className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center group-hover:border-orange-400 transition-colors">
+                      <div className="w-2 h-2 bg-transparent group-hover:bg-orange-400 rounded-full transition-colors" />
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-card p-6 rounded-2xl flex flex-col flex-1">
           {!selectedProject ? (
             <>
               <div className="flex flex-col gap-4 mb-6">
@@ -348,14 +520,18 @@ export default function Dashboard() {
                   if (recMode === 'projects') {
                     const projects = subjectProjects[targetSubject.id] || subjectProjects.java_programming;
                     return projects.map((proj, i) => (
-                      <div 
+                      <motion.div 
                         key={i} 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05 }}
                         onClick={() => setSelectedProject(proj)}
-                        className="p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
+                        className="p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-neon-blue/5 hover:border-neon-blue/30 transition-all cursor-pointer group relative overflow-hidden"
                       >
-                        <h3 className="font-semibold text-white group-hover:text-neon-blue transition-colors text-sm">{proj.title}</h3>
-                        <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">{proj.reason}</p>
-                      </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-neon-blue/0 to-neon-blue/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <h3 className="font-semibold text-white group-hover:text-neon-blue transition-colors text-sm relative z-10">{proj.title}</h3>
+                        <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider relative z-10">{proj.reason}</p>
+                      </motion.div>
                     ));
                   }
 
@@ -419,7 +595,8 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }
 
 function SparklesIcon() {

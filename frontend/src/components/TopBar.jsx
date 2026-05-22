@@ -10,6 +10,13 @@ export default function TopBar() {
   const [level, setLevel] = useState(1);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const [isFocusMode, setIsFocusMode] = useState(false);
+
+  useEffect(() => {
+    const handleFocusMode = (e) => setIsFocusMode(e.detail);
+    window.addEventListener('focusModeToggle', handleFocusMode);
+    return () => window.removeEventListener('focusModeToggle', handleFocusMode);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -95,6 +102,8 @@ export default function TopBar() {
       setSearchQuery('');
     }
   };
+
+  if (isFocusMode) return null;
 
   return (
     <header className="h-20 glass-panel border-b border-white/5 px-4 md:px-8 flex items-center justify-between z-50 sticky top-0">
