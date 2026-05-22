@@ -231,13 +231,25 @@ export default function Quiz() {
         if (passed) {
             subjectData.highestLevel = Math.max(subjectData.highestLevel, lvl);
             subjectData.status = 'improving';
+            
+            // Update XP for passing
+            const currentXP = parseInt(localStorage.getItem('xp') || '0');
+            localStorage.setItem('xp', (currentXP + 50).toString());
         } else {
             subjectData.status = 'lagging';
         }
         subjectData.lastScore = resultScore;
 
+        // Update Focus Score based on accuracy
+        const currentFocus = parseInt(localStorage.getItem('focusScore') || '0');
+        const newFocus = Math.min(100, Math.max(0, currentFocus + (passed ? 5 : -5)));
+        localStorage.setItem('focusScore', newFocus.toString());
+
         currentProgress[selectedSubject.id] = subjectData;
         localStorage.setItem('neuroPathProgress', JSON.stringify(currentProgress));
+        
+        // Trigger profile update
+        window.dispatchEvent(new Event('profileUpdate'));
     };
 
     const completeLevel = () => {

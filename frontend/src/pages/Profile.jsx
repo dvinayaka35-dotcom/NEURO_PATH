@@ -10,20 +10,49 @@ export default function Profile() {
     const [isEditingName, setIsEditingName] = useState(false);
     const [profileImage, setProfileImage] = useState(null);
 
-    useEffect(() => {
-        const storedEmail = localStorage.getItem('email') || '';
-        const storedJoined = localStorage.getItem('joinedDate') || 'Today';
-        const storedVerified = localStorage.getItem('verified') === 'true';
-        const storedCustomName = localStorage.getItem('customName');
-        const storedImage = localStorage.getItem(`profileImage_${storedEmail}`);
-        const xp = parseInt(localStorage.getItem('xp') || '0');
+    const [stats, setStats] = useState({
+        xp: 0,
+        studyTime: '0h 0m',
+        focusScore: 0
+    });
 
-        setEmail(storedEmail);
-        setJoinedDate(storedJoined);
-        setIsVerified(storedVerified);
-        setCustomName(storedCustomName || (storedEmail ? storedEmail.split('@')[0].replace(/\b\w/g, (c) => c.toUpperCase()) : 'New Learner'));
-        setLevel(Math.floor(xp / 100) + 1);
-        setProfileImage(storedImage);
+    useEffect(() => {
+        const updateProfile = () => {
+            const storedEmail = localStorage.getItem('email') || '';
+            const storedJoined = localStorage.getItem('joinedDate') || 'Today';
+            const storedVerified = localStorage.getItem('verified') === 'true';
+            const storedCustomName = localStorage.getItem('customName');
+            const storedImage = localStorage.getItem(`profileImage_${storedEmail}`);
+            const xp = parseInt(localStorage.getItem('xp') || '0');
+            const studySeconds = parseInt(localStorage.getItem('totalStudyTime') || '0');
+            const focusScore = parseInt(localStorage.getItem('focusScore') || '0');
+
+            setEmail(storedEmail);
+            setJoinedDate(storedJoined);
+            setIsVerified(storedVerified);
+            setCustomName(storedCustomName || (storedEmail ? storedEmail.split('@')[0].replace(/\b\w/g, (c) => c.toUpperCase()) : 'New Learner'));
+            setLevel(Math.floor(xp / 100) + 1);
+            setProfileImage(storedImage);
+
+            // Format study time
+            const hours = Math.floor(studySeconds / 3600);
+            const minutes = Math.floor((studySeconds % 3600) / 60);
+            
+            setStats({
+                xp: xp,
+                studyTime: `${hours}h ${minutes}m`,
+                focusScore: focusScore
+            });
+        };
+
+        updateProfile();
+        window.addEventListener('profileUpdate', updateProfile);
+        const interval = setInterval(updateProfile, 60000); // Refresh every minute
+
+        return () => {
+            window.removeEventListener('profileUpdate', updateProfile);
+            clearInterval(interval);
+        };
     }, []);
 
     const handleImageChange = (e) => {
@@ -131,10 +160,10 @@ export default function Profile() {
                     <h2 className="text-xl font-semibold mb-4">Learning Overview</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
-                            { icon: ShieldCheck, label: 'Verified Email', value: 'Yes' },
-                            { icon: Sparkles, label: 'Current XP', value: '0' },
-                            { icon: CalendarDays, label: 'Study Time', value: '0h 0m' },
-                            { icon: User, label: 'Focus Score', value: '0/100' },
+                            { icon: ShieldCheck, label: 'Verified Email', value: isVerified ? 'Yes' : 'No' },
+                            { icon: Sparkles, label: 'Current XP', value: stats.xp },
+                            { icon: CalendarDays, label: 'Study Time', value: stats.studyTime },
+                            { icon: User, label: 'Focus Score', value: `${stats.focusScore}/100` },
                         ].map((item, index) => (
                             <div key={index} className="rounded-3xl bg-white/5 p-5 border border-white/5">
                                 <div className="flex items-center gap-3 mb-3 text-slate-400">

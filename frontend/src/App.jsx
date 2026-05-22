@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
@@ -17,6 +18,25 @@ function AppContent() {
   const location = useLocation();
   const token = localStorage.getItem('token');
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
+  // Global Study Timer Logic
+  useEffect(() => {
+    let interval;
+    if (token) {
+      interval = setInterval(() => {
+        const currentTime = parseInt(localStorage.getItem('totalStudyTime') || '0');
+        localStorage.setItem('totalStudyTime', (currentTime + 1).toString());
+        
+        // Update XP every 5 minutes of study (300 seconds)
+        if ((currentTime + 1) % 300 === 0) {
+          const currentXP = parseInt(localStorage.getItem('xp') || '0');
+          localStorage.setItem('xp', (currentXP + 10).toString());
+          window.dispatchEvent(new Event('profileUpdate'));
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [token]);
 
   // Always redirect to login if no token is found and not on an auth page
   if (!token && !isAuthPage) {
