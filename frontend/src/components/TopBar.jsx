@@ -74,7 +74,12 @@ export default function TopBar() {
     { title: 'Chat', path: '/chat', description: 'Ask the AI Assistant' },
     { title: 'Study Packs', path: '/study-packs', description: 'Curated learning materials' },
     { title: 'Profile', path: '/profile', description: 'View your account' },
-    { title: 'Settings', path: '/settings', description: 'System preferences' }
+    { title: 'Settings', path: '/settings', description: 'System preferences' },
+    // Subjects
+    { title: 'Java Programming', path: '/quiz', description: 'Object-Oriented Programming (OOP) Deep Dive' },
+    { title: 'Dynamic Websites', path: '/quiz', description: 'Responsive Web & Full-Stack Development' },
+    { title: 'Software Engineering', path: '/quiz', description: 'Testing Techniques & SDLC' },
+    { title: 'Business Intelligence', path: '/quiz', description: 'ETL Process & Data Architecture' }
   ];
 
   const filteredResults = searchQuery.trim() === '' 
@@ -84,22 +89,30 @@ export default function TopBar() {
         item.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter' && filteredResults.length > 0) {
+      navigate(filteredResults[0].path);
+      setSearchQuery('');
+    }
+  };
+
   return (
-    <header className="h-20 glass-panel border-b border-white/5 px-8 flex items-center justify-between z-30 sticky top-0">
+    <header className="h-20 glass-panel border-b border-white/5 px-4 md:px-8 flex items-center justify-between z-50 sticky top-0">
       <div className="flex items-center gap-4 flex-1">
-        <div className="relative w-full max-w-md hidden md:block">
+        <div className="relative w-full max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={lang === 'KN' ? "ಹುಡುಕಿ..." : "Search for subjects, study packs..."}
-            className="w-full bg-dark-surface/50 border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all placeholder:text-slate-500"
+            onKeyDown={handleSearchKeyPress}
+            placeholder={lang === 'KN' ? "ಹುಡುಕಿ..." : "Search subjects..."}
+            className="w-full bg-dark-surface/50 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-purple focus:ring-1 focus:ring-neon-purple transition-all placeholder:text-slate-500"
           />
           
           {/* Search Results Dropdown */}
           {filteredResults.length > 0 && (
-            <div className="absolute top-full left-0 mt-2 w-full glass-panel border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50">
+            <div className="absolute top-full left-0 mt-2 w-full glass-panel border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-[100] max-h-[400px] overflow-y-auto">
               {filteredResults.map((result, idx) => (
                 <button
                   key={idx}
@@ -107,11 +120,11 @@ export default function TopBar() {
                     navigate(result.path);
                     setSearchQuery('');
                   }}
-                  className="w-full p-4 text-left hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors flex items-center justify-between group"
+                  className="w-full p-4 text-left hover:bg-white/10 border-b border-white/5 last:border-0 transition-colors flex items-center justify-between group"
                 >
                   <div>
                     <p className="font-bold text-sm text-white group-hover:text-neon-blue transition-colors">{result.title}</p>
-                    <p className="text-[10px] text-slate-500">{result.description}</p>
+                    <p className="text-[10px] text-slate-500 line-clamp-1">{result.description}</p>
                   </div>
                   <Search className="w-4 h-4 text-slate-700 group-hover:text-neon-blue opacity-0 group-hover:opacity-100 transition-all" />
                 </button>
