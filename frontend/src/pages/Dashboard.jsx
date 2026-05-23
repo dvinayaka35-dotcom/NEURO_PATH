@@ -137,16 +137,36 @@ export default function Dashboard() {
             <SparklesIcon /> AI Recommendations
           </h2>
           <div className="flex-1 space-y-4">
-            {[
-              { title: 'Review Calculus Ch. 4', reason: 'Weak subject detected' },
-              { title: 'Take a 15m Break', reason: 'Focus dropping slightly' },
-              { title: 'Daily Physics Quiz', reason: 'Maintain your streak' }
-            ].map((rec, i) => (
-              <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
-                <h3 className="font-semibold text-white group-hover:text-neon-blue transition-colors">{rec.title}</h3>
-                <p className="text-xs text-slate-400 mt-1">{rec.reason}</p>
-              </div>
-            ))}
+            {(() => {
+              const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
+              const subjects = Object.values(progress);
+              const lagging = subjects.filter(s => s.status === 'lagging');
+              
+              if (subjects.length === 0) {
+                return (
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5 text-center">
+                    <p className="text-slate-500 text-xs italic">Take a quiz to see AI recommendations</p>
+                  </div>
+                );
+              }
+
+              return (
+                <>
+                  {lagging.map((sub, i) => (
+                    <div key={i} className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors cursor-pointer group">
+                      <h3 className="font-semibold text-red-400">Review {sub.title}</h3>
+                      <p className="text-xs text-red-300/70 mt-1">Struggling with Level {sub.highestLevel + 1}</p>
+                    </div>
+                  ))}
+                  {subjects.filter(s => s.status !== 'lagging').map((sub, i) => (
+                    <div key={i} className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors cursor-pointer group">
+                      <h3 className="font-semibold text-emerald-400">Continue {sub.title}</h3>
+                      <p className="text-xs text-emerald-300/70 mt-1">Ready for Level {sub.highestLevel + 1}</p>
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
           </div>
           <button
             onClick={() => navigate('/study-packs')}

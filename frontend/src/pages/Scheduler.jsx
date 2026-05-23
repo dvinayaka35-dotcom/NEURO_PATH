@@ -3,15 +3,61 @@ import { CalendarDays, Plus, Clock, Trash2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Scheduler() {
-    const [sessions, setSessions] = useState([
-        { id: 1, title: 'Physics Focus', time: '10:00 AM', duration: '45m', completed: false },
-        { id: 2, title: 'Maths Mastery', time: '02:30 PM', duration: '60m', completed: false }
-    ]);
+    const [sessions, setSessions] = useState(() => {
+        const saved = localStorage.getItem('studySessions');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, title: 'Physics Focus', time: '10:00 AM', duration: '45m', completed: false },
+            { id: 2, title: 'Maths Mastery', time: '02:30 PM', duration: '60m', completed: false }
+        ];
+    });
+    const [isRecommending, setIsRecommending] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem('studySessions', JSON.stringify(sessions));
+    }, [sessions]);
+
+    const getAIRecommendation = async () => {
+        setIsRecommending(true);
+        try {
+            // Fetch real progress from the Quiz module
+            const progress = JSON.parse(localStorage.getItem('neuroPathProgress') || '{}');
+            const laggingSubjects = Object.keys(progress).filter(id => progress[id].status === 'lagging');
+            
+            let recommended;
+            let status = 'recommended';
+
+            if (laggingSubjects.length > 0) {
+                // Prioritize subjects the student is failing
+                const subId = laggingSubjects[0];
+                recommended = `RECOVERY: ${progress[subId].title}`;
+                status = 'critical';
+            } else {
+                // Suggest a new subject from the curriculum
+                const curriculum = ['Java Programming', 'Dynamic Websites', 'Software Engineering', 'Business Intelligence'];
+                recommended = `ADVANCED: ${curriculum[Math.floor(Math.random() * curriculum.length)]}`;
+            }
+            
+            const newSession = {
+                id: Date.now(),
+                title: recommended,
+                time: '05:00 PM',
+                duration: '45m',
+                completed: false,
+                status: status // Track if it's a lagging subject
+            };
+            setSessions([...sessions, newSession]);
+        } finally {
+            setIsRecommending(false);
+        }
+    };
 
     const addSession = () => {
+        const title = prompt("Enter Study Topic:", "Biology Revision");
+        if (!title) return;
+
         const newSession = {
             id: Date.now(),
-            title: 'New Study Session',
+            title: title,
             time: '04:00 PM',
             duration: '30m',
             completed: false
@@ -36,12 +82,21 @@ export default function Scheduler() {
                     <h1 className="text-3xl font-bold">Smart Scheduler</h1>
                     <p className="text-slate-400 mt-1">Manage your weekly learning routine with AI-optimized intervals.</p>
                 </div>
-                <button 
-                    onClick={addSession}
-                    className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-neon-blue to-neon-purple text-white font-bold hover:shadow-[0_0_20px_rgba(176,38,255,0.4)] transition-all"
-                >
-                    <Plus className="w-5 h-5" /> Quick Schedule
-                </button>
+                <div className="flex gap-3">
+                    <button 
+                        onClick={getAIRecommendation}
+                        disabled={isRecommending}
+                        className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-neon-blue font-bold hover:bg-white/10 transition-all disabled:opacity-50"
+                    >
+                        {isRecommending ? 'Thinking...' : 'AI Suggestion'}
+                    </button>
+                    <button 
+                        onClick={addSession}
+                        className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-neon-blue to-neon-purple text-white font-bold hover:shadow-[0_0_20px_rgba(176,38,255,0.4)] transition-all"
+                    >
+                        <Plus className="w-5 h-5" /> Quick Schedule
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -55,6 +110,7 @@ export default function Scheduler() {
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className={`glass-card p-5 rounded-3xl border flex items-center justify-between group transition-all ${
+                                    session.status === 'critical' ? 'border-red-500/50 bg-red-500/10' :
                                     session.completed ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10 hover:border-white/20'
                                 }`}
                             >
@@ -68,9 +124,16 @@ export default function Scheduler() {
                                         <CheckCircle2 className="w-6 h-6" />
                                     </button>
                                     <div>
-                                        <h3 className={`font-bold transition-all ${session.completed ? 'text-slate-500 line-through' : 'text-white'}`}>
-                                            {session.title}
-                                        </h3>
+                                        <div className="flex items-center gap-2">
+                                            <h3 className={`font-bold transition-all ${session.completed ? 'text-slate-500 line-through' : 'text-white'}`}>
+                                                {session.title}
+                                            </h3>
+                                            {session.status === 'critical' && (
+                                                <span className="text-[9px] bg-red-500 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">
+                                                    Lagging
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="flex items-center gap-3 text-xs text-slate-500 mt-1 uppercase tracking-widest">
                                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {session.time}</span>
                                             <span>•</span>
