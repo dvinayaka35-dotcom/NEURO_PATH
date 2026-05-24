@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import Dashboard from './pages/Dashboard';
@@ -10,11 +10,18 @@ import Scheduler from './pages/Scheduler';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Settings from './pages/Settings';
 import VoiceAssistantModal from './components/VoiceAssistantModal';
 
 function AppContent() {
   const location = useLocation();
+  const token = localStorage.getItem('token');
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
+  // Always redirect to login if no token is found and not on an auth page
+  if (!token && !isAuthPage) {
+    return <Navigate to="/login" replace />;
+  }
 
   if (isAuthPage) {
     return (
@@ -26,7 +33,7 @@ function AppContent() {
   }
 
   return (
-    <div className="flex h-screen bg-dark-bg text-slate-100 overflow-hidden relative">
+    <div className="flex h-screen bg-dark-bg overflow-hidden relative">
       {/* Futuristic Background Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-neon-purple/20 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-neon-blue/20 blur-[120px] pointer-events-none" />
@@ -41,7 +48,7 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/quiz" element={<Quiz />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/gamification" element={<Gamification />} />

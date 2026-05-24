@@ -8,12 +8,14 @@ export default function Profile() {
     const [customName, setCustomName] = useState('');
     const [level, setLevel] = useState(1);
     const [isEditingName, setIsEditingName] = useState(false);
+    const [profileImage, setProfileImage] = useState(null);
 
     useEffect(() => {
         const storedEmail = localStorage.getItem('email') || '';
         const storedJoined = localStorage.getItem('joinedDate') || 'Today';
         const storedVerified = localStorage.getItem('verified') === 'true';
         const storedCustomName = localStorage.getItem('customName');
+        const storedImage = localStorage.getItem(`profileImage_${storedEmail}`);
         const xp = parseInt(localStorage.getItem('xp') || '0');
 
         setEmail(storedEmail);
@@ -21,7 +23,23 @@ export default function Profile() {
         setIsVerified(storedVerified);
         setCustomName(storedCustomName || (storedEmail ? storedEmail.split('@')[0].replace(/\b\w/g, (c) => c.toUpperCase()) : 'New Learner'));
         setLevel(Math.floor(xp / 100) + 1);
+        setProfileImage(storedImage);
     }, []);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file && email) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result;
+                setProfileImage(base64String);
+                localStorage.setItem(`profileImage_${email}`, base64String);
+                // Trigger global update
+                window.dispatchEvent(new Event('profileUpdate'));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleNameSave = () => {
         localStorage.setItem('customName', customName);
@@ -49,8 +67,24 @@ export default function Profile() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="glass-card p-6 rounded-3xl border border-white/10">
                     <div className="flex items-center gap-4 mb-6">
-                        <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-neon-purple to-neon-blue flex items-center justify-center text-white">
-                            <User className="w-7 h-7" />
+                        <div className="relative group">
+                            <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-neon-purple to-neon-blue flex items-center justify-center text-white border-2 border-white/10 group-hover:border-neon-blue transition-all cursor-pointer">
+                                {profileImage ? (
+                                    <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <User className="w-8 h-8" />
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                title="Change Profile Image"
+                            />
+                            <div className="absolute -bottom-1 -right-1 bg-neon-blue text-dark-bg rounded-full p-1 border-2 border-dark-bg group-hover:scale-110 transition-transform">
+                                <Sparkles className="w-3 h-3" />
+                            </div>
                         </div>
                         <div>
                             {isEditingName ? (

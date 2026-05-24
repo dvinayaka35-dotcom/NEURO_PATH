@@ -9,7 +9,8 @@
             "Compiler"
         ],
         "answer": "Library",
-        "difficulty": "easy"
+        "difficulty": "easy",
+        "topic": "Web Development"
     },
     {
         "id": 2,
@@ -21,6 +22,46 @@
             "Sorting"
         ],
         "answer": "Function calling itself",
-        "difficulty": "medium"
+        "difficulty": "medium",
+        "topic": "Algorithms"
+    },
+    {
+        "id": 3,
+        "question": "Which of the following is a NoSQL database?",
+        "options": [
+            "MySQL",
+            "PostgreSQL",
+            "MongoDB",
+            "Oracle"
+        ],
+        "answer": "MongoDB",
+        "difficulty": "easy",
+        "topic": "Databases"
+    },
+    {
+        "id": 4,
+        "question": "What is the time complexity of binary search?",
+        "options": [
+            "O(n)",
+            "O(log n)",
+            "O(n^2)",
+            "O(1)"
+        ],
+        "answer": "O(log n)",
+        "difficulty": "medium",
+        "topic": "Algorithms"
+    },
+    {
+        "id": 5,
+        "question": "In React, which hook is used for side effects?",
+        "options": [
+            "useState",
+            "useMemo",
+            "useEffect",
+            "useContext"
+        ],
+        "answer": "useEffect",
+        "difficulty": "easy",
+        "topic": "React"
     }
 ]

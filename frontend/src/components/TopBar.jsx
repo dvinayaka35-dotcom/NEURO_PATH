@@ -24,7 +24,18 @@ export default function TopBar() {
     setDisplayName(fallbackName);
     setCustomName(storedCustomName || fallbackName);
     setLevel(Math.floor(xp / 100) + 1);
+    setProfileImage(localStorage.getItem(`profileImage_${email}`));
+
+    // Listen for global profile updates
+    const handleUpdate = () => {
+      const currentEmail = localStorage.getItem('email');
+      setProfileImage(localStorage.getItem(`profileImage_${currentEmail}`));
+    };
+    window.addEventListener('profileUpdate', handleUpdate);
+    return () => window.removeEventListener('profileUpdate', handleUpdate);
   }, []);
+
+  const [profileImage, setProfileImage] = useState(null);
 
   const handleNameSave = () => {
     const trimmedName = customName.trim();
@@ -120,8 +131,12 @@ export default function TopBar() {
             <p className="text-xs text-slate-500">Level {level} Scholar</p>
           </div>
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-neon-purple to-neon-blue p-[2px]">
-            <div className="w-full h-full rounded-full bg-dark-bg flex items-center justify-center">
-              <User className="w-5 h-5 text-slate-300" />
+            <div className="w-full h-full rounded-full bg-dark-bg flex items-center justify-center overflow-hidden">
+              {profileImage ? (
+                <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-slate-300" />
+              )}
             </div>
           </div>
         </div>

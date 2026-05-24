@@ -1,14 +1,21 @@
-# Python artifacts
+# Node modules
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python
+venv/
 __pycache__/
 *.py[cod]
 *$py.class
-
-# Virtual environments
-backend/.venv/
-
-# Environment variables
+*.db
 .env
 
-# IDE files
+# IDEs
 .vscode/
-*.swp
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

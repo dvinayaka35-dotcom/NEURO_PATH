@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 import api from '../api';
 
@@ -8,7 +8,8 @@ export default function Register() {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        parentPhone: ''
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -38,7 +39,8 @@ export default function Register() {
         try {
             const response = await api.post('/auth/register', {
                 email: formData.email,
-                password: formData.password
+                password: formData.password,
+                parent_phone: formData.parentPhone
             });
             const verificationCodeFromServer = response.data?.verification_code;
             localStorage.setItem('email', formData.email);
@@ -116,6 +118,24 @@ export default function Register() {
                                     required
                                     className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-neon-purple focus:border-transparent transition-all duration-200 text-white placeholder-slate-400"
                                     placeholder="Enter your email"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Parent's Mobile Number
+                            </label>
+                            <div className="relative">
+                                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                <input
+                                    type="tel"
+                                    name="parentPhone"
+                                    value={formData.parentPhone}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-neon-purple focus:border-transparent transition-all duration-200 text-white placeholder-slate-400"
+                                    placeholder="Enter parent's mobile number"
                                 />
                             </div>
                         </div>

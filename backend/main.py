@@ -6,6 +6,8 @@ from routers import quiz
 from routers import progress
 from routers import hints
 from routers import auth
+from routers import user
+from routers import ai
 
 app = FastAPI(
     title="EduAI Backend",
@@ -27,6 +29,8 @@ app.include_router(quiz.router)
 app.include_router(progress.router)
 app.include_router(hints.router)
 app.include_router(auth.router)
+app.include_router(user.router)
+app.include_router(ai.router)
 
 @app.get("/")
 def home():

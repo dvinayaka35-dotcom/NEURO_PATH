@@ -4,11 +4,12 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from pydantic import BaseModel
+from typing import Optional
 import secrets
 import string
 
 from database import get_session
-from models import User
+from models import User, LoginHistory
 
 router = APIRouter(
     prefix="/auth",
@@ -26,6 +27,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 class UserCreate(BaseModel):
     email: str
     password: str
+    parent_phone: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: str
@@ -76,7 +78,8 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
         email=user.email,
         password_hash=hashed_password,
         is_verified=False,
-        verification_code=verification_code
+        verification_code=verification_code,
+        parent_phone=user.parent_phone
     )
     session.add(new_user)
     session.commit()
@@ -124,4 +127,10 @@ def login(user: UserLogin, session: Session = Depends(get_session)):
     access_token = create_access_token(
         data={"sub": db_user.email}, expires_delta=access_token_expires
     )
+    
+    # Log login activity
+    history = LoginHistory(user_id=db_user.id)
+    session.add(history)
+    session.commit()
+    
     return {"access_token": access_token, "token_type": "bearer"}
